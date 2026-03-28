@@ -39,7 +39,7 @@ public class PrismTestScreen extends Screen {
 
         // Feature: Fluid Tank with Custom Data Provider
         centralDashboard.addElement(34, 100, (info) -> {
-            float level = PrismAnimation.easeInOutQuad(smoothProgress);
+            float level = PrismAnimation.easeInOutQuart(smoothProgress);
             PrismRenderer.renderFluidTankWithTooltip(info.guiGraphics(), Fluids.LAVA, (int)(2000 * level), 2000,
                     info.x(), info.y(), info.width(), info.height(), info.mouseX(), info.mouseY(),
                     (tank) -> List.of(
@@ -53,16 +53,16 @@ public class PrismTestScreen extends Screen {
         centralDashboard.addElement(120, 100, (info) -> {
             info.guiGraphics().fill(info.x(), info.y(), info.x() + info.width(), info.y() + info.height(), 0x22FFFFFF);
 
-            PrismRenderer.renderStringCenteredX(info.guiGraphics(), font, info.x() + (info.width()/2), info.y() + 10, 1.2f,
-                    Component.literal("SYSTEM STATUS").withStyle(ChatFormatting.UNDERLINE), Color.WHITE, true);
+            PrismRenderer.renderStringCenteredX(info.guiGraphics(), font, Component.literal("SYSTEM STATUS").withStyle(ChatFormatting.UNDERLINE),
+                    info.x() + (info.width()/2), info.y() + 10, 1.2f, Color.WHITE, true);
 
             String status = smoothProgress > 0.8f ? "OVERLOAD" : (smoothProgress < 0.2f ? "IDLE" : "ACTIVE");
             Color color = smoothProgress > 0.8f ? Color.RED : (smoothProgress < 0.2f ? Color.GRAY : Color.GREEN);
 
             // Using easeOutBack for a "popping" text effect
-            float textScale = 1.0f + (PrismAnimation.easeInOutQuad(smoothProgress) * 0.5f);
-            PrismRenderer.renderStringCenteredXY(info.guiGraphics(), font, info.x() + (info.width()/2), info.y() + 50,
-                    textScale, Component.literal(status), color, true);
+            float textScale = 1.0f + (PrismAnimation.easeInOutQuart(smoothProgress) * 0.5f);
+            PrismRenderer.renderStringCenteredXY(info.guiGraphics(), font, Component.literal(status),
+                    info.x() + (info.width()/2), info.y() + 50, textScale, color, true);
         });
 
         // 2. [LAYOUT] SIDEBAR NODES (Vertical)
@@ -74,8 +74,8 @@ public class PrismTestScreen extends Screen {
                 PrismRenderer.renderProgressBar(info.guiGraphics(), info.x(), info.y(), info.width(), info.height(),
                         smoothProgress, new Color(100, 0, 255), new Color(40, 0, 100), PrismDirection.RIGHT);
 
-                PrismRenderer.renderStringCenteredXY(info.guiGraphics(), font, info.x() + 25, info.y() + 12, 0.7f,
-                        Component.literal("NODE-" + id), Color.WHITE, false);
+                PrismRenderer.renderStringCenteredXY(info.guiGraphics(), font, Component.literal("NODE-" + id),
+                        info.x() + 25, info.y() + 12, 0.7f, Color.WHITE, false);
             });
         }
     }
@@ -95,8 +95,8 @@ public class PrismTestScreen extends Screen {
         this.renderBackground(guiGraphics, mouseX, mouseY, partialTick);
 
         // --- 2. HEADER ---
-        PrismRenderer.renderStringCenteredX(guiGraphics, font, width / 2, 20, 2.5f,
-                Component.literal("PRISM FRAMEWORK").withStyle(ChatFormatting.BOLD, ChatFormatting.LIGHT_PURPLE), Color.WHITE, true);
+        PrismRenderer.renderStringGradientCenteredX(guiGraphics, font, Component.literal("PRISM FRAMEWORK").withStyle(ChatFormatting.BOLD),
+                width / 2, 20, 2.5f, Color.RED, Color.BLUE, true);
 
         // --- 3. DRAW LAYOUTS ---
         int dashboardX = (width / 2) - (centralDashboard.getTotalWidth() / 2);
@@ -119,7 +119,7 @@ public class PrismTestScreen extends Screen {
         int texY = 60;
         // Feature: Textured Progress with automatic UV calculation
         PrismRenderer.renderProgressBarTexture(guiGraphics, FURNACE_GUI, texX, texY, 24, 17, smoothProgress, 79, 34, PrismDirection.RIGHT);
-        PrismRenderer.renderStringCenteredX(guiGraphics, font, texX + 12, texY + 22, 0.6f, Component.literal("UV_CLIP"), Color.GRAY, false);
+        PrismRenderer.renderStringCenteredX(guiGraphics, font, Component.literal("UV_CLIP"), texX + 12, texY + 22, 0.6f, Color.GRAY, false);
 
         // --- 6. SCISSOR MARQUEE (Clipped Area) ---
         int mWidth = 180;
@@ -128,18 +128,30 @@ public class PrismTestScreen extends Screen {
         guiGraphics.fill(mX - 2, mY - 2, mX + mWidth + 2, mY + 14, 0x55000000);
 
         PrismRenderer.startScissor(guiGraphics, mX, mY, mWidth, 12);
-        // Animate text offset based on smoothProgress
+
+        // Logic: Text slides from left to right based on smoothProgress
         int scroll = (int)(smoothProgress * 400) - 150;
-        PrismRenderer.renderString(guiGraphics, font, mX + scroll, mY + 2, 1.0f,
-                Component.literal("SCISSOR CLIPPING ENABLED • LERPING ACTIVE • RENDER ENGINE STABLE"), Color.GREEN, false);
+
+        // Now using the [Component -> Coordinates] signature
+        PrismRenderer.renderString(
+                guiGraphics,
+                font,
+                Component.literal("SCISSOR CLIPPING ENABLED • LERPING ACTIVE • RENDER ENGINE STABLE"),
+                mX + scroll,
+                mY + 2,
+                1.0f,
+                Color.GREEN,
+                false
+        );
+
         PrismRenderer.stopScissor(guiGraphics);
 
         // --- 7. THE REQUESTED WATERMARK (Bottom Left) ---
-        PrismRenderer.renderString(guiGraphics, font, 10, height - 15, 0.8f,
-                Component.literal("Prism API v1.0.0").withStyle(ChatFormatting.ITALIC), Color.LIGHT_GRAY, false);
+        PrismRenderer.renderString(guiGraphics, font, Component.literal("Prism API v1.0.0").withStyle(ChatFormatting.ITALIC),
+                10, height - 15, 0.8f, Color.LIGHT_GRAY, false);
 
         // Final Watermark details
-        PrismRenderer.renderString(guiGraphics, font, 10, height - 25, 0.5f,
-                Component.literal("DEVELOPER BUILD - BK"), Color.GRAY, false);
+        PrismRenderer.renderString(guiGraphics, font, Component.literal("DEVELOPER BUILD - BK"),
+                10, height - 25, 0.5f, Color.GRAY, false);
     }
 }

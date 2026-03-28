@@ -1,5 +1,6 @@
 package com.bartekkansy.prism.api.client.render;
 
+import com.bartekkansy.prism.api.client.ui.PrismAnimation;
 import com.bartekkansy.prism.api.client.ui.PrismDirection;
 import com.bartekkansy.prism.api.fluid.FluidTankInfo;
 import com.bartekkansy.prism.api.fluid.IPrismFluidHelper;
@@ -14,7 +15,10 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.ComponentContents;
+import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
@@ -74,31 +78,6 @@ public class PrismRenderer {
 
         // Begin the builder with QUADS format
         BufferBuilder builder = tesselator.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
-
-        // Tiling Logic
-//        for (int drawX = 0; drawX < width; drawX += 16) {
-//            for (int drawY = 0; drawY < height; drawY += 16) {
-//                // Calculate how much of this specific 16x16 tile to draw
-//                int partWidth = Math.min(width - drawX, 16);
-//                int partHeight = Math.min(height - drawY, 16);
-//
-//                // Get valid screen coordinates
-//                int screenX = x + drawX;
-//                int screenY = y + (height - drawY) - partHeight;
-//
-//                // Get valid UVs
-//                float minU = sprite.getU0();
-//                float maxU = sprite.getU0() + (sprite.getU1() - sprite.getU0()) * (partWidth / 16.0f);
-//                float minV = sprite.getV0();
-//                float maxV = sprite.getV0() + (sprite.getV1() - sprite.getV0()) * (partHeight / 16.0f);
-//
-//                // Add vertices
-//                builder.addVertex(matrix, screenX, screenY + partHeight, zLevel).setUv(minU, maxV).setColor(r, g, b, a);
-//                builder.addVertex(matrix, screenX + partWidth, screenY + partHeight, zLevel).setUv(maxU, maxV).setColor(r, g, b, a);
-//                builder.addVertex(matrix, screenX + partWidth, screenY, zLevel).setUv(maxU, minV).setColor(r, g, b, a);
-//                builder.addVertex(matrix, screenX, screenY, zLevel).setUv(minU, minV).setColor(r, g, b, a);
-//            }
-//        }
 
         // Tiling Logic
         for (int drawX = 0; drawX < width; drawX += 16) {
@@ -519,14 +498,14 @@ public class PrismRenderer {
      *
      * @param guiGraphics The current {@link GuiGraphics} instance.
      * @param font        The {@link Font} renderer.
+     * @param string      The {@link Component} to render.
      * @param x           The X-coordinate (left-aligned anchor).
      * @param y           The Y-coordinate (top-aligned anchor).
      * @param scale       The scale factor (e.g., {@code 0.5f} for half size).
-     * @param string      The {@link Component} to render.
      * @param color       The ARGB integer color.
      * @param shadow      Whether to render a drop-shadow.
      */
-    public static void renderString(GuiGraphics guiGraphics, Font font, int x, int y, float scale, Component string, int color, boolean shadow) {
+    public static void renderString(GuiGraphics guiGraphics, Font font, Component string, int x, int y, float scale, int color, boolean shadow) {
         guiGraphics.pose().pushPose();
         guiGraphics.pose().translate(x, y, 0);
         guiGraphics.pose().scale(scale, scale, scale);
@@ -539,10 +518,10 @@ public class PrismRenderer {
     /**
      * Renders a string with a specific scale using a {@link Color} object.
      *
-     * @see #renderString(GuiGraphics, Font, int, int, float, Component, int, boolean)
+     * @see #renderString(GuiGraphics, Font, Component, int, int, float, int, boolean)
      */
-    public static void renderString(GuiGraphics guiGraphics, Font font, int x, int y, float scale, Component string, Color color, boolean shadow) {
-        renderString(guiGraphics, font, x, y, scale, string, color.getRGB(), shadow);
+    public static void renderString(GuiGraphics guiGraphics, Font font, Component string, int x, int y, float scale, Color color, boolean shadow) {
+        renderString(guiGraphics, font, string, x, y, scale, color.getRGB(), shadow);
     }
 
     /**
@@ -553,21 +532,21 @@ public class PrismRenderer {
      * </p>
      *
      * @param x The horizontal center point.
-     * @see #renderString(GuiGraphics, Font, int, int, float, Component, int, boolean)
+     * @see #renderString(GuiGraphics, Font, Component, int, int, float, int, boolean)
      */
-    public static void renderStringCenteredX(GuiGraphics guiGraphics, Font font, int x, int y, float scale, Component string, int color, boolean shadow) {
+    public static void renderStringCenteredX(GuiGraphics guiGraphics, Font font, Component string, int x, int y, float scale, int color, boolean shadow) {
         float width = font.width(string) * scale;
         float adjustedX = x - (width / 2f);
-        renderString(guiGraphics, font, (int) adjustedX, y, scale, string, color, shadow);
+        renderString(guiGraphics, font, string, (int) adjustedX, y, scale, color, shadow);
     }
 
     /**
      * Renders a string centered horizontally using a {@link Color} object.
      *
-     * @see #renderStringCenteredX(GuiGraphics, Font, int, int, float, Component, int, boolean)
+     * @see #renderStringCenteredX(GuiGraphics, Font, Component, int, int, float, int, boolean)
      */
-    public static void renderStringCenteredX(GuiGraphics guiGraphics, Font font, int x, int y, float scale, Component string, Color color, boolean shadow) {
-        renderStringCenteredX(guiGraphics, font, x, y, scale, string, color.getRGB(), shadow);
+    public static void renderStringCenteredX(GuiGraphics guiGraphics, Font font, Component string, int x, int y, float scale, Color color, boolean shadow) {
+        renderStringCenteredX(guiGraphics, font, string, x, y, scale, color.getRGB(), shadow);
     }
 
     /**
@@ -578,21 +557,21 @@ public class PrismRenderer {
      * </p>
      *
      * @param y The vertical center point.
-     * @see #renderString(GuiGraphics, Font, int, int, float, Component, int, boolean)
+     * @see #renderString(GuiGraphics, Font, Component, int, int, float, int, boolean)
      */
-    public static void renderStringCenteredY(GuiGraphics guiGraphics, Font font, int x, int y, float scale, Component string, int color, boolean shadow) {
+    public static void renderStringCenteredY(GuiGraphics guiGraphics, Font font, Component string, int x, int y, float scale, int color, boolean shadow) {
         float height = font.lineHeight * scale;
         float adjustedY = y - (height / 2f);
-        renderString(guiGraphics, font, x, (int) adjustedY, scale, string, color, shadow);
+        renderString(guiGraphics, font, string, x, (int) adjustedY, scale, color, shadow);
     }
 
     /**
      * Renders a string centered vertically using a {@link Color} object.
      *
-     * @see #renderStringCenteredY(GuiGraphics, Font, int, int, float, Component, int, boolean)
+     * @see #renderStringCenteredY(GuiGraphics, Font, Component, int, int, float, int, boolean)
      */
-    public static void renderStringCenteredY(GuiGraphics guiGraphics, Font font, int x, int y, float scale, Component string, Color color, boolean shadow) {
-        renderStringCenteredY(guiGraphics, font, x, y, scale, string, color.getRGB(), shadow);
+    public static void renderStringCenteredY(GuiGraphics guiGraphics, Font font, Component string, int x, int y, float scale, Color color, boolean shadow) {
+        renderStringCenteredY(guiGraphics, font, string, x, y, scale, color.getRGB(), shadow);
     }
 
     /**
@@ -604,21 +583,21 @@ public class PrismRenderer {
      *
      * @param x The horizontal center point.
      * @param y The vertical center point.
-     * @see #renderString(GuiGraphics, Font, int, int, float, Component, int, boolean)
+     * @see #renderString(GuiGraphics, Font, Component, int, int, float, int, boolean)
      */
-    public static void renderStringCenteredXY(GuiGraphics guiGraphics, Font font, int x, int y, float scale, Component string, int color, boolean shadow) {
+    public static void renderStringCenteredXY(GuiGraphics guiGraphics, Font font, Component string, int x, int y, float scale, int color, boolean shadow) {
         float width = font.width(string) * scale;
         float height = font.lineHeight * scale;
-        renderString(guiGraphics, font, (int)(x - width / 2f), (int)(y - height / 2f), scale, string, color, shadow);
+        renderString(guiGraphics, font, string, (int)(x - width / 2f), (int)(y - height / 2f), scale, color, shadow);
     }
 
     /**
      * Renders a string perfectly centered using a {@link Color} object.
      *
-     * @see #renderStringCenteredXY(GuiGraphics, Font, int, int, float, Component, int, boolean)
+     * @see #renderStringCenteredXY(GuiGraphics, Font, Component, int, int, float, int, boolean)
      */
-    public static void renderStringCenteredXY(GuiGraphics guiGraphics, Font font, int x, int y, float scale, Component string, Color color, boolean shadow) {
-        renderStringCenteredXY(guiGraphics, font, x, y, scale, string, color.getRGB(), shadow);
+    public static void renderStringCenteredXY(GuiGraphics guiGraphics, Font font, Component string, int x, int y, float scale, Color color, boolean shadow) {
+        renderStringCenteredXY(guiGraphics, font, string, x, y, scale, color.getRGB(), shadow);
     }
 
     /**
@@ -640,5 +619,143 @@ public class PrismRenderer {
      */
     public static void stopScissor(GuiGraphics guiGraphics) {
         guiGraphics.disableScissor();
+    }
+
+    /**
+     * Renders a Component with a color gradient, multiplied by the Component's intrinsic style color.
+     * If the Component color is White, the gradient is rendered normally.
+     *
+     * @param guiGraphics The vanilla GuiGraphics instance.
+     * @param font        The font renderer.
+     * @param text        The Component to render (supports nested styles/colors).
+     * @param x           X position.
+     * @param y           Y position.
+     * @param scale       Text scale.
+     * @param colorStart  Starting gradient color (ARGB).
+     * @param colorEnd    Ending gradient color (ARGB).
+     * @param shadow      Whether to draw a text shadow.
+     */
+    public static void renderStringGradient(GuiGraphics guiGraphics, Font font, Component text, int x, int y, float scale, int colorStart, int colorEnd, boolean shadow) {
+        guiGraphics.pose().pushPose();
+        guiGraphics.pose().translate(x, y, 0);
+        guiGraphics.pose().scale(scale, scale, 1.0f);
+
+        float totalWidth = font.width(text);
+        final float[] currentX = {0}; // Array used to allow modification inside lambda
+
+        // Start/End color extraction
+        int r0 = (colorStart >> 16) & 0xFF, g0 = (colorStart >> 8) & 0xFF, b0 = colorStart & 0xFF, a0 = (colorStart >> 24) & 0xFF;
+        int r1 = (colorEnd >> 16) & 0xFF, g1 = (colorEnd >> 8) & 0xFF, b1 = colorEnd & 0xFF, a1 = (colorEnd >> 24) & 0xFF;
+
+        text.getVisualOrderText().accept((index, style, codePoint) -> {
+            String ch = new String(Character.toChars(codePoint));
+            float delta = currentX[0] / Math.max(1, totalWidth);
+
+            // Interpolate Gradient
+            int gr = (int) PrismAnimation.lerp(r0, r1, delta);
+            int gg = (int) PrismAnimation.lerp(g0, g1, delta);
+            int gb = (int) PrismAnimation.lerp(b0, b1, delta);
+            int ga = (int) PrismAnimation.lerp(a0, a1, delta);
+
+            // Component Tint (White = 1.0)
+            int cCol = style.getColor() != null ? style.getColor().getValue() : 0xFFFFFF;
+
+            // Multiply channels
+            int fr = (gr * ((cCol >> 16) & 0xFF)) / 255;
+            int fg = (gg * ((cCol >> 8) & 0xFF)) / 255;
+            int fb = (gb * (cCol & 0xFF)) / 255;
+
+            guiGraphics.drawString(font, ch, (int)currentX[0], 0, (ga << 24) | (fr << 16) | (fg << 8) | fb, shadow);
+            currentX[0] += font.width(FormattedCharSequence.forward(ch, style));
+            return true;
+        });
+
+        guiGraphics.pose().popPose();
+    }
+
+    /**
+     * Renders a gradient colored string using a {@link Color} objects.
+     *
+     * @see #renderStringGradient(GuiGraphics, Font, Component, int, int, float, int, int, boolean)
+     */
+    public static void renderStringGradient(GuiGraphics guiGraphics, Font font, Component text, int x, int y, float scale, Color colorStart, Color colorEnd, boolean shadow) {
+        renderStringGradient(guiGraphics, font, text, x, y, scale, colorStart.getRGB(), colorEnd.getRGB(), shadow);
+    }
+
+    /**
+     * Renders a string centered horizontally relative to the provided X coordinate.
+     * Iterates through each character to calculate a unique interpolated color.
+     * <p>
+     * The method calculates the total width of the string multiplied by the scale
+     * to ensure the center remains consistent even when the text is resized.
+     * </p>
+     *
+     * @param x The horizontal center point.
+     * @see #renderStringGradient(GuiGraphics, Font, Component, int, int, float, int, int, boolean)
+     */
+    public static void renderStringGradientCenteredX(GuiGraphics guiGraphics, Font font, Component text, int x, int y, float scale, int colorStart, int colorEnd, boolean shadow) {
+        float width = font.width(text) * scale;
+        renderStringGradient(guiGraphics, font, text, (int)(x - width / 2), y, scale, colorStart, colorEnd, shadow);
+    }
+
+    /**
+     * Renders a string centered horizontally using a gradient with {@link Color} objects.
+     *
+     * @see #renderStringGradientCenteredX(GuiGraphics, Font, Component, int, int, float, int, int, boolean)
+     */
+    public static void renderStringGradientCenteredX(GuiGraphics guiGraphics, Font font, Component text, int x, int y, float scale, Color colorStart, Color colorEnd, boolean shadow) {
+        renderStringGradientCenteredX(guiGraphics, font, text, x, y, scale, colorStart.getRGB(), colorEnd.getRGB(), shadow);
+    }
+
+    /**
+     * Renders a string centered vertically relative to the provided Y coordinate.
+     * Iterates through each character to calculate a unique interpolated color.
+     * <p>
+     * Useful for aligning labels inside bars or buttons where the text needs
+     * to be centered between the top and bottom borders.
+     * </p>
+     *
+     * @param y The vertical center point.
+     * @see #renderStringGradient(GuiGraphics, Font, Component, int, int, float, int, int, boolean)
+     */
+    public static void renderStringGradientCenteredY(GuiGraphics guiGraphics, Font font, Component text, int x, int y, float scale, int colorStart, int colorEnd, boolean shadow) {
+        float height = font.lineHeight * scale;
+        renderStringGradient(guiGraphics, font, text, x, (int)(y - height / 2), scale, colorStart, colorEnd, shadow);
+    }
+
+    /**
+     * Renders a string centered vertically using a gradient with {@link Color} objects.
+     *
+     * @see #renderStringGradientCenteredY(GuiGraphics, Font, Component, int, int, float, int, int, boolean)
+     */
+    public static void renderStringGradientCenteredY(GuiGraphics guiGraphics, Font font, Component text, int x, int y, float scale, Color colorStart, Color colorEnd, boolean shadow) {
+        renderStringGradientCenteredY(guiGraphics, font, text, x, y, scale, colorStart.getRGB(), colorEnd.getRGB(), shadow);
+    }
+
+    /**
+     * Renders a string perfectly centered on both the X and Y axes.
+     * Iterates through each character to calculate a unique interpolated color.
+     * <p>
+     * This is the standard choice for titles, icon labels, and tooltips
+     * where the text must be perfectly balanced within a bounding box.
+     * </p>
+     *
+     * @param x The horizontal center point.
+     * @param y The vertical center point.
+     * @see #renderStringGradient(GuiGraphics, Font, Component, int, int, float, int, int, boolean)
+     */
+    public static void renderStringGradientCenteredXY(GuiGraphics guiGraphics, Font font, Component text, int x, int y, float scale, int colorStart, int colorEnd, boolean shadow) {
+        float width = font.width(text) * scale;
+        float height = font.lineHeight * scale;
+        renderStringGradient(guiGraphics, font, text, (int)(x - width / 2), (int)(y - height / 2), scale, colorStart, colorEnd, shadow);
+    }
+
+    /**
+     * Renders a string centered vertically and horizontally using a gradient with {@link Color} objects.
+     *
+     * @see #renderStringGradientCenteredXY(GuiGraphics, Font, Component, int, int, float, int, int, boolean)
+     */
+    public static void renderStringGradientCenteredXY(GuiGraphics guiGraphics, Font font, Component text, int x, int y, float scale, Color colorStart, Color colorEnd, boolean shadow) {
+        renderStringGradientCenteredXY(guiGraphics, font, text, x, y, scale, colorStart.getRGB(), colorEnd.getRGB(), shadow);
     }
 }
