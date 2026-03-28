@@ -1,6 +1,6 @@
 package com.bartekkansy.prism.api.util.neoforge;
 
-import com.bartekkansy.prism.api.client.render.IPrismFluidHelper;
+import com.bartekkansy.prism.api.fluid.IPrismFluidHelper;
 import com.bartekkansy.prism.neoforge.PrismFluidHelperNeo;
 
 public class PrismPlatformImpl {

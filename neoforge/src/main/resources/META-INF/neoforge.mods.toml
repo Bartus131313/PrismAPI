@@ -29,4 +29,4 @@ side = "BOTH"
 
 
 [[mixins]]
-config = "prismapi.mixins.json"
+config = "prism.mixins.json"

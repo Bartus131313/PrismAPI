@@ -1,8 +1,9 @@
 package com.bartekkansy.prism.neoforge;
 
-import com.bartekkansy.prism.api.client.render.IPrismFluidHelper;
+import com.bartekkansy.prism.api.fluid.IPrismFluidHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.level.material.Fluid;
@@ -18,5 +19,11 @@ public class PrismFluidHelperNeo implements IPrismFluidHelper {
     @Override
     public int getColor(Fluid fluid) {
         return IClientFluidTypeExtensions.of(fluid).getTintColor();
+    }
+
+    @Override
+    public Component getDisplayName(Fluid fluid) {
+        // NeoForge uses FluidType for the "Real" name
+        return fluid.getFluidType().getDescription();
     }
 }
