@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "id": "prism",
+  "version": "${version}",
+  "name": "PrismAPI",
+  "description": "A powerful UI and Rendering library for 1.21.1",
+  "authors": [
+    "Bartek Kansy"
+  ],
+  "contact": {
+    "homepage": ""
+  },
+  "license": "MIT",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "com.bartekkansy.prism.fabric.PrismFabric"
+    ],
+    "client": [
+      "com.bartekkansy.prism.fabric.client.PrismFabricClient"
+    ]
+  },
+  "mixins": [
+    "prism.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.18.5",
+    "minecraft": "~1.21.1",
+    "java": ">=21",
+    "fabric-api": "*"
+  },
+  "suggests": {
+    "another-mod": "*"
+  }
+}

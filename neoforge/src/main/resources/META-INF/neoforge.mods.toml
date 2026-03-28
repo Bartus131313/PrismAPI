@@ -1,0 +1,32 @@
+modLoader = "javafml"
+loaderVersion = "[2,)"
+#issueTrackerURL = ""
+license = "MIT"
+
+[[mods]]
+modId = "prism"
+version = "${version}"
+displayName = "PrismAPI"
+authors = "Bartek Kansy"
+description = '''
+A powerful UI and Rendering library for 1.21.1
+'''
+#logoFile = ""
+
+[[dependencies.prism]]
+modId = "neoforge"
+type = "required"
+versionRange = "[21,)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.prism]]
+modId = "minecraft"
+type = "required"
+versionRange = "[1.21.1,)"
+ordering = "NONE"
+side = "BOTH"
+
+
+[[mixins]]
+config = "prismapi.mixins.json"
