@@ -1,0 +1,4 @@
+{
+  "test.container_info": "This container has %s mB of %s",
+  "test.capacity": "Capacity: %s mB"
+}

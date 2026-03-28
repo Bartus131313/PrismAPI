@@ -1,10 +1,9 @@
-package com.bartekkansy.prism.neoforge.client;
+package com.bartekkansy.test;
 
 import com.bartekkansy.prism.api.client.render.PrismRenderer;
 import com.bartekkansy.prism.api.client.ui.PrismAnimation;
 import com.bartekkansy.prism.api.client.ui.PrismDirection;
 import com.bartekkansy.prism.api.client.ui.PrismLayout;
-import com.bartekkansy.prism.api.util.PrismNumberFormatter;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
@@ -14,10 +13,9 @@ import net.minecraft.world.level.material.Fluids;
 import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
-import java.util.ArrayList;
 import java.util.List;
 
-public class PrismTestScreen extends Screen {
+public class TestScreen extends Screen {
 
     // --- API COMPONENTS ---
     private final PrismLayout centralDashboard = new PrismLayout();
@@ -31,7 +29,7 @@ public class PrismTestScreen extends Screen {
     // --- ASSETS ---
     private static final ResourceLocation FURNACE_GUI = ResourceLocation.fromNamespaceAndPath("minecraft", "textures/gui/container/furnace.png");
 
-    public PrismTestScreen() {
+    public TestScreen() {
         super(Component.literal("Prism API Master Dashboard"));
 
         // 1. [LAYOUT] CENTRAL DASHBOARD (Horizontal)
@@ -129,14 +127,16 @@ public class PrismTestScreen extends Screen {
 
         PrismRenderer.startScissor(guiGraphics, mX, mY, mWidth, 12);
 
+        String text = "SCISSOR CLIPPING ENABLED • LERPING ACTIVE • RENDER ENGINE STABLE";
+
         // Logic: Text slides from left to right based on smoothProgress
-        int scroll = (int)(smoothProgress * 400) - 150;
+        int scroll = (int)(smoothProgress * (font.width(text) + 5)) - font.width(text);
 
         // Now using the [Component -> Coordinates] signature
         PrismRenderer.renderString(
                 guiGraphics,
                 font,
-                Component.literal("SCISSOR CLIPPING ENABLED • LERPING ACTIVE • RENDER ENGINE STABLE"),
+                Component.literal(text),
                 mX + scroll,
                 mY + 2,
                 1.0f,
