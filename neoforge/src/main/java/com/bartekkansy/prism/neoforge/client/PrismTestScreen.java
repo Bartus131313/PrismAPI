@@ -1,7 +1,9 @@
 package com.bartekkansy.prism.neoforge.client;
 
 import com.bartekkansy.prism.api.client.render.PrismRenderer;
+import com.bartekkansy.prism.api.client.ui.PrismAnimation;
 import com.bartekkansy.prism.api.client.ui.PrismDirection;
+import com.bartekkansy.prism.api.client.ui.PrismLayout;
 import com.bartekkansy.prism.api.util.PrismNumberFormatter;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphics;
@@ -17,78 +19,127 @@ import java.util.List;
 
 public class PrismTestScreen extends Screen {
 
-    // Dummy texture for progress bar testing (using vanilla furnace arrow as example)
-    private static final ResourceLocation GUI_TEXTURE = ResourceLocation.fromNamespaceAndPath("minecraft", "textures/gui/container/furnace.png");
+    // --- API COMPONENTS ---
+    private final PrismLayout centralDashboard = new PrismLayout();
+    private final PrismLayout sidebarNodes = new PrismLayout();
+
+    // --- ANIMATION STATE ---
+    private float smoothProgress = 0.0f;
+    private float targetProgress = 0.0f;
+    private long lastMs = System.currentTimeMillis();
+
+    // --- ASSETS ---
+    private static final ResourceLocation FURNACE_GUI = ResourceLocation.fromNamespaceAndPath("minecraft", "textures/gui/container/furnace.png");
 
     public PrismTestScreen() {
-        super(Component.literal("Prism API Debug Screen"));
+        super(Component.literal("Prism API Master Dashboard"));
+
+        // 1. [LAYOUT] CENTRAL DASHBOARD (Horizontal)
+        centralDashboard.setSpacing(20);
+
+        // Feature: Fluid Tank with Custom Data Provider
+        centralDashboard.addElement(34, 100, (info) -> {
+            float level = PrismAnimation.easeInOutQuad(smoothProgress);
+            PrismRenderer.renderFluidTankWithTooltip(info.guiGraphics(), Fluids.LAVA, (int)(2000 * level), 2000,
+                    info.x(), info.y(), info.width(), info.height(), info.mouseX(), info.mouseY(),
+                    (tank) -> List.of(
+                            Component.literal("THERMAL REACTOR").withStyle(ChatFormatting.RED, ChatFormatting.BOLD),
+                            Component.literal("Capacity: " + tank.amount() + " / " + tank.capacity() + " mB").withStyle(ChatFormatting.GRAY),
+                            Component.literal("Efficiency: " + (int)(smoothProgress * 100) + "%").withStyle(ChatFormatting.GOLD)
+                    ));
+        });
+
+        // Feature: Scaled Typography & Dynamic Logic
+        centralDashboard.addElement(120, 100, (info) -> {
+            info.guiGraphics().fill(info.x(), info.y(), info.x() + info.width(), info.y() + info.height(), 0x22FFFFFF);
+
+            PrismRenderer.renderStringCenteredX(info.guiGraphics(), font, info.x() + (info.width()/2), info.y() + 10, 1.2f,
+                    Component.literal("SYSTEM STATUS").withStyle(ChatFormatting.UNDERLINE), Color.WHITE, true);
+
+            String status = smoothProgress > 0.8f ? "OVERLOAD" : (smoothProgress < 0.2f ? "IDLE" : "ACTIVE");
+            Color color = smoothProgress > 0.8f ? Color.RED : (smoothProgress < 0.2f ? Color.GRAY : Color.GREEN);
+
+            // Using easeOutBack for a "popping" text effect
+            float textScale = 1.0f + (PrismAnimation.easeInOutQuad(smoothProgress) * 0.5f);
+            PrismRenderer.renderStringCenteredXY(info.guiGraphics(), font, info.x() + (info.width()/2), info.y() + 50,
+                    textScale, Component.literal(status), color, true);
+        });
+
+        // 2. [LAYOUT] SIDEBAR NODES (Vertical)
+        sidebarNodes.setSpacing(10);
+        for(int i = 1; i <= 3; i++) {
+            final int id = i;
+            sidebarNodes.addElement(50, 25, (info) -> {
+                // Feature: Horizontal Directional Progress
+                PrismRenderer.renderProgressBar(info.guiGraphics(), info.x(), info.y(), info.width(), info.height(),
+                        smoothProgress, new Color(100, 0, 255), new Color(40, 0, 100), PrismDirection.RIGHT);
+
+                PrismRenderer.renderStringCenteredXY(info.guiGraphics(), font, info.x() + 25, info.y() + 12, 0.7f,
+                        Component.literal("NODE-" + id), Color.WHITE, false);
+            });
+        }
     }
 
     @Override
     public void render(@NotNull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-        super.render(guiGraphics, mouseX, mouseY, partialTick);
+        // --- 1. ANIMATION LOGIC ---
+        long now = System.currentTimeMillis();
+        float deltaTime = (now - lastMs) / 1000f;
+        lastMs = now;
 
-        // 1. Background
+        // Toggle target every 3 seconds for demo purposes
+        this.targetProgress = (now % 6000 < 3000) ? 1.0f : 0.0f;
+        // Smoothly interpolate the progress value
+        this.smoothProgress = PrismAnimation.lerp(smoothProgress, targetProgress, deltaTime * 3.5f);
+
         this.renderBackground(guiGraphics, mouseX, mouseY, partialTick);
 
-        // 2. Animated Progress (0.0 to 1.0 based on system time)
-        float pulse = (System.currentTimeMillis() % 2000) / 2000f;
+        // --- 2. HEADER ---
+        PrismRenderer.renderStringCenteredX(guiGraphics, font, width / 2, 20, 2.5f,
+                Component.literal("PRISM FRAMEWORK").withStyle(ChatFormatting.BOLD, ChatFormatting.LIGHT_PURPLE), Color.WHITE, true);
 
-        // --- SECTION: TYPOGRAPHY ---
-        PrismRenderer.renderStringCenteredX(guiGraphics, font, width / 2, 10, 1.5f,
-                Component.literal("PRISM UI DEBUGGER").withStyle(ChatFormatting.BOLD), Color.CYAN, true);
+        // --- 3. DRAW LAYOUTS ---
+        int dashboardX = (width / 2) - (centralDashboard.getTotalWidth() / 2);
+        int dashboardY = (height / 2) - 50;
+        centralDashboard.drawHorizontal(guiGraphics, dashboardX, dashboardY, mouseX, mouseY);
 
-        PrismRenderer.renderString(guiGraphics, font, 10, height - 20, 0.7f,
-                Component.literal("Prism API v1.0 - Scaled Footer Text"), Color.GRAY, false);
+        sidebarNodes.drawVertical(guiGraphics, 20, 60, mouseX, mouseY);
 
-        // --- SECTION: FLUID TANKS ---
-        // Water Tank (Custom Tooltip)
-        guiGraphics.fill(45, 45, 87, 178, 0xaa000000); // Background frame
-        PrismRenderer.renderFluidTankWithTooltip(guiGraphics, Fluids.WATER, 750, 1000, 50, 50, 32, 128, mouseX, mouseY,
-                (info) -> {
-                    List<Component> lines = new ArrayList<>();
-                    lines.add(info.getDisplayName().copy().withStyle(ChatFormatting.AQUA));
-                    lines.add(Component.literal(PrismNumberFormatter.format(info.amount()) + " mB").withStyle(ChatFormatting.GRAY));
-                    return lines;
-                }
-        );
+        // --- 4. DIRECTIONAL STRESS TEST (Grid) ---
+        int gridX = 20;
+        int gridY = height - 80;
+        // Testing UP, DOWN, LEFT, RIGHT in a single cluster
+        PrismRenderer.renderProgressBar(guiGraphics, gridX, gridY, 10, 40, smoothProgress, Color.YELLOW, PrismDirection.UP);
+        PrismRenderer.renderProgressBar(guiGraphics, gridX + 15, gridY, 10, 40, smoothProgress, Color.ORANGE, PrismDirection.DOWN);
+        PrismRenderer.renderProgressBar(guiGraphics, gridX + 30, gridY + 10, 40, 10, smoothProgress, Color.RED, PrismDirection.LEFT);
+        PrismRenderer.renderProgressBar(guiGraphics, gridX + 30, gridY + 25, 40, 10, smoothProgress, Color.PINK, PrismDirection.RIGHT);
 
-        // Lava Tank (Default Tooltip)
-        guiGraphics.fill(95, 45, 137, 178, 0xaa000000);
-        PrismRenderer.renderFluidTankWithTooltip(guiGraphics, Fluids.LAVA, (int)(1000 * pulse), 1000, 100, 50, 32, 128, mouseX, mouseY);
+        // --- 5. TEXTURED PROGRESS (UV CLIPPING) ---
+        int texX = width - 60;
+        int texY = 60;
+        // Feature: Textured Progress with automatic UV calculation
+        PrismRenderer.renderProgressBarTexture(guiGraphics, FURNACE_GUI, texX, texY, 24, 17, smoothProgress, 79, 34, PrismDirection.RIGHT);
+        PrismRenderer.renderStringCenteredX(guiGraphics, font, texX + 12, texY + 22, 0.6f, Component.literal("UV_CLIP"), Color.GRAY, false);
 
-        // --- SECTION: PROCEDURAL PROGRESS BARS ---
-        // Vertical Power Bar (Gradient)
-        PrismRenderer.renderProgressBar(guiGraphics, 150, 50, 15, 128, pulse,
-                new Color(0, 255, 0), new Color(0, 100, 0), PrismDirection.UP);
-        PrismRenderer.renderContainerTooltip(guiGraphics, 150, 50, 15, 128, mouseX, mouseY, Component.literal("Energy: " + (int)(pulse * 100) + "%"));
+        // --- 6. SCISSOR MARQUEE (Clipped Area) ---
+        int mWidth = 180;
+        int mX = width - mWidth - 20;
+        int mY = height - 40;
+        guiGraphics.fill(mX - 2, mY - 2, mX + mWidth + 2, mY + 14, 0x55000000);
 
-        // Horizontal Health Bar (Solid Color)
-        PrismRenderer.renderProgressBar(guiGraphics, 180, 50, 100, 10, pulse, Color.RED, PrismDirection.RIGHT);
-
-        // Reverse Horizontal Bar (Right to Left)
-        PrismRenderer.renderProgressBar(guiGraphics, 180, 65, 100, 10, pulse, Color.MAGENTA, PrismDirection.LEFT);
-
-        // --- SECTION: TEXTURED PROGRESS ---
-        // furnace arrow example (Horizontal)
-        PrismRenderer.renderProgressBarTexture(guiGraphics, GUI_TEXTURE, 180, 85, 24, 17, pulse, 79, 34, PrismDirection.RIGHT);
-
-        // --- SECTION: SCISSOR CLIPPING ---
-        PrismRenderer.renderString(guiGraphics, font, 180, 110, 1.0f, Component.literal("Clipped Area:"), Color.YELLOW, true);
-
-        // Start clipping to a small box
-        PrismRenderer.startScissor(guiGraphics, 180, 125, 50, 20);
-        guiGraphics.fill(180, 125, 230, 145, 0x44FFFFFF); // Debug box to see clipped area
-
-        // This text is moving, but will only be visible inside the 50x20 box
-        int xOffset = (int) (pulse * 100) - 50;
-        PrismRenderer.renderString(guiGraphics, font, 180 + xOffset, 130, 1.0f, Component.literal("SCROLLING TEXT"), Color.WHITE, false);
-
+        PrismRenderer.startScissor(guiGraphics, mX, mY, mWidth, 12);
+        // Animate text offset based on smoothProgress
+        int scroll = (int)(smoothProgress * 400) - 150;
+        PrismRenderer.renderString(guiGraphics, font, mX + scroll, mY + 2, 1.0f,
+                Component.literal("SCISSOR CLIPPING ENABLED • LERPING ACTIVE • RENDER ENGINE STABLE"), Color.GREEN, false);
         PrismRenderer.stopScissor(guiGraphics);
 
-        // --- SECTION: CENTERED XY TEST ---
-        // Perfect for "Loading..." text or item labels
-        PrismRenderer.renderStringCenteredXY(guiGraphics, font, width - 60, height - 60, 1.0f,
-                Component.literal("CENTERED"), Color.ORANGE, true);
+        // --- 7. THE REQUESTED WATERMARK (Bottom Left) ---
+        PrismRenderer.renderString(guiGraphics, font, 10, height - 15, 0.8f,
+                Component.literal("Prism API v1.0.0").withStyle(ChatFormatting.ITALIC), Color.LIGHT_GRAY, false);
+
+        // Final Watermark details
+        PrismRenderer.renderString(guiGraphics, font, 10, height - 25, 0.5f,
+                Component.literal("DEVELOPER BUILD - BK"), Color.GRAY, false);
     }
 }
