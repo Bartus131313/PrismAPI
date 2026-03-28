@@ -18,6 +18,15 @@ subprojects {
     apply plugin: 'architectury-plugin'
     apply plugin: 'maven-publish'
 
+    // List the names of the modules you want to SKIP
+    def silentModules = ['common', 'testmod-neoforge']
+
+    if (silentModules.contains(project.name)) {
+        // This disables the publishing tasks for these specific modules
+        tasks.withType(PublishToMavenRepository).configureEach { it.enabled = false }
+        tasks.withType(PublishToMavenLocal).configureEach { it.enabled = false }
+    }
+
     base {
         // Set up a suffixed format for the mod jar names, e.g. `example-fabric`.
         archivesName = "$rootProject.archives_name-$project.name"

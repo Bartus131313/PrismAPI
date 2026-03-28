@@ -11,6 +11,8 @@ Prism is a high-performance, developer-friendly UI and rendering library designe
 - 📐 **Adaptive Layouts**: Flex-box inspired PrismLayout system for automatic horizontal and vertical element positioning.
 - ✂️ **Precision Clipping**: Easy-to-use Scissor API for marquees, scrolling lists, and contained UI elements.
 
+![Demo of Prism API](images/demo-1.0.0.png)
+
 ## 🚀 Quick Start
 1. **Smooth Rendering**
 > Instead of static bars, use the PrismAnimation utility to create organic movement
@@ -79,17 +81,21 @@ layout.drawHorizontal(guiGraphics, centerX, centerY, mouseX, mouseY);
 ## 📦 Installation
 Add the following to your build.gradle:
 ```groovy
+def prism_version = "1.0.0" // Replace with the version you want (e.g., v1.0.0 or main-SNAPSHOT)
+
 repositories {
-    maven { url = "https://jitpack.io" }
+    maven { url "https://jitpack.io" }
 }
 
 dependencies {
-    // For NeoForge Projects
-    implementation "com.github.Bartus131313:prism-neoforge:1.0.0"
+    // --- For NeoForge Projects ---
+    implementation "com.github.bartekkansy.PrismAPI:prism-api-neoforge:${prism_version}"
 
-    // For Fabric Projects
-    modImplementation "com.github.Bartus131313:prism-fabric:1.0.0"
-    include "com.github.Bartus131313:prism-fabric:1.0.0" // Optional: Jars-in-Jar
+    // --- For Fabric Projects ---
+    modImplementation "com.github.bartekkansy.PrismAPI:prism-api-fabric:${prism_version}"
+
+    // Optional: Include the API inside your mod jar (Jars-in-Jar)
+    // include "com.github.bartekkansy.PrismAPI:prism-api-fabric:${prism_version}"
 }
 ```
 
