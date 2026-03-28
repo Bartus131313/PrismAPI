@@ -3,11 +3,13 @@ package com.bartekkansy.prism.api.client.render;
 import com.bartekkansy.prism.api.client.ui.PrismDirection;
 import com.bartekkansy.prism.api.fluid.FluidTankInfo;
 import com.bartekkansy.prism.api.fluid.IPrismFluidHelper;
+import com.bartekkansy.prism.api.util.PrismNumberFormatter;
 import com.bartekkansy.prism.api.util.PrismPlatform;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -195,7 +197,7 @@ public class PrismRenderer {
 
             // Create the tooltip text (e.g., "Lava: 500 / 1000 mB")
             lines.add(Component.empty().append(info.getDisplayName())
-                    .append(Component.literal(": " + amount + " / " + maxAmount + " mB"))
+                    .append(Component.literal(": " + PrismNumberFormatter.format(amount) + " / " + PrismNumberFormatter.format(maxAmount) + " mB"))
                     .withStyle(ChatFormatting.GRAY));
 
             return lines;
@@ -484,5 +486,137 @@ public class PrismRenderer {
                 guiGraphics.blit(texture, x + (width - fillWidth), y, u + (width - fillWidth), v, fillWidth, height);
             }
         }
+    }
+
+    /**
+     * Renders a string with a specific scale and ARGB color.
+     * <p>
+     * This method handles the coordinate transformation by pushing a new pose,
+     * translating to the target coordinates, and applying the scale factor.
+     * </p>
+     *
+     * @param guiGraphics The current {@link GuiGraphics} instance.
+     * @param font        The {@link Font} renderer.
+     * @param x           The X-coordinate (left-aligned anchor).
+     * @param y           The Y-coordinate (top-aligned anchor).
+     * @param scale       The scale factor (e.g., {@code 0.5f} for half size).
+     * @param string      The {@link Component} to render.
+     * @param color       The ARGB integer color.
+     * @param shadow      Whether to render a drop-shadow.
+     */
+    public static void renderString(GuiGraphics guiGraphics, Font font, int x, int y, float scale, Component string, int color, boolean shadow) {
+        guiGraphics.pose().pushPose();
+        guiGraphics.pose().translate(x, y, 0);
+        guiGraphics.pose().scale(scale, scale, scale);
+
+        guiGraphics.drawString(font, string, 0, 0, color, shadow);
+
+        guiGraphics.pose().popPose();
+    }
+
+    /**
+     * Renders a string with a specific scale using a {@link Color} object.
+     *
+     * @see #renderString(GuiGraphics, Font, int, int, float, Component, int, boolean)
+     */
+    public static void renderString(GuiGraphics guiGraphics, Font font, int x, int y, float scale, Component string, Color color, boolean shadow) {
+        renderString(guiGraphics, font, x, y, scale, string, color.getRGB(), shadow);
+    }
+
+    /**
+     * Renders a string centered horizontally relative to the provided X coordinate.
+     * <p>
+     * The method calculates the total width of the string multiplied by the scale
+     * to ensure the center remains consistent even when the text is resized.
+     * </p>
+     *
+     * @param x The horizontal center point.
+     * @see #renderString(GuiGraphics, Font, int, int, float, Component, int, boolean)
+     */
+    public static void renderStringCenteredX(GuiGraphics guiGraphics, Font font, int x, int y, float scale, Component string, int color, boolean shadow) {
+        float width = font.width(string) * scale;
+        float adjustedX = x - (width / 2f);
+        renderString(guiGraphics, font, (int) adjustedX, y, scale, string, color, shadow);
+    }
+
+    /**
+     * Renders a string centered horizontally using a {@link Color} object.
+     *
+     * @see #renderStringCenteredX(GuiGraphics, Font, int, int, float, Component, int, boolean)
+     */
+    public static void renderStringCenteredX(GuiGraphics guiGraphics, Font font, int x, int y, float scale, Component string, Color color, boolean shadow) {
+        renderStringCenteredX(guiGraphics, font, x, y, scale, string, color.getRGB(), shadow);
+    }
+
+    /**
+     * Renders a string centered vertically relative to the provided Y coordinate.
+     * <p>
+     * Useful for aligning labels inside bars or buttons where the text needs
+     * to be centered between the top and bottom borders.
+     * </p>
+     *
+     * @param y The vertical center point.
+     * @see #renderString(GuiGraphics, Font, int, int, float, Component, int, boolean)
+     */
+    public static void renderStringCenteredY(GuiGraphics guiGraphics, Font font, int x, int y, float scale, Component string, int color, boolean shadow) {
+        float height = font.lineHeight * scale;
+        float adjustedY = y - (height / 2f);
+        renderString(guiGraphics, font, x, (int) adjustedY, scale, string, color, shadow);
+    }
+
+    /**
+     * Renders a string centered vertically using a {@link Color} object.
+     *
+     * @see #renderStringCenteredY(GuiGraphics, Font, int, int, float, Component, int, boolean)
+     */
+    public static void renderStringCenteredY(GuiGraphics guiGraphics, Font font, int x, int y, float scale, Component string, Color color, boolean shadow) {
+        renderStringCenteredY(guiGraphics, font, x, y, scale, string, color.getRGB(), shadow);
+    }
+
+    /**
+     * Renders a string perfectly centered on both the X and Y axes.
+     * <p>
+     * This is the standard choice for titles, icon labels, and tooltips
+     * where the text must be perfectly balanced within a bounding box.
+     * </p>
+     *
+     * @param x The horizontal center point.
+     * @param y The vertical center point.
+     * @see #renderString(GuiGraphics, Font, int, int, float, Component, int, boolean)
+     */
+    public static void renderStringCenteredXY(GuiGraphics guiGraphics, Font font, int x, int y, float scale, Component string, int color, boolean shadow) {
+        float width = font.width(string) * scale;
+        float height = font.lineHeight * scale;
+        renderString(guiGraphics, font, (int)(x - width / 2f), (int)(y - height / 2f), scale, string, color, shadow);
+    }
+
+    /**
+     * Renders a string perfectly centered using a {@link Color} object.
+     *
+     * @see #renderStringCenteredXY(GuiGraphics, Font, int, int, float, Component, int, boolean)
+     */
+    public static void renderStringCenteredXY(GuiGraphics guiGraphics, Font font, int x, int y, float scale, Component string, Color color, boolean shadow) {
+        renderStringCenteredXY(guiGraphics, font, x, y, scale, string, color.getRGB(), shadow);
+    }
+
+    /**
+     * Starts a scissor cut on the screen. Any rendering calls made after this
+     * and before {@link #stopScissor(GuiGraphics)} will be clipped to this area.
+     * @param x      The X-coordinate of the top-left corner.
+     * @param y      The Y-coordinate of the top-left corner.
+     * @param width  The width of the visible window.
+     * @param height The height of the visible window.
+     */
+    public static void startScissor(GuiGraphics guiGraphics, int x, int y, int width, int height) {
+        // Minecraft's enableScissor uses absolute screen coordinates.
+        // It's best to use the built-in GuiGraphics helper which handles scaling.
+        guiGraphics.enableScissor(x, y, x + width, y + height);
+    }
+
+    /**
+     * Disables the current scissor cut and restores full-screen rendering.
+     */
+    public static void stopScissor(GuiGraphics guiGraphics) {
+        guiGraphics.disableScissor();
     }
 }

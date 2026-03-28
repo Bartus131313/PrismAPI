@@ -25,7 +25,10 @@ public class PrismTestScreen extends Screen {
         // Draw a dark background so we can see the fluid
         this.renderBackground(guiGraphics, mouseX, mouseY, partialTick);
 
-        PrismRenderer.renderFluidTankWithTooltip(guiGraphics, Fluids.LAVA, 500, 1000, 100, 100, 32, 128, mouseX, mouseY,
+        PrismRenderer.renderStringCenteredX(guiGraphics, font, width / 2, 10, 1.0f, Component.literal("Prism API Debug Screen"), 0xFFFFFFFF, true);
+
+        guiGraphics.fill(100, 100, 132, 228, 0xaa000000);
+        PrismRenderer.renderFluidTankWithTooltip(guiGraphics, Fluids.WATER, 500, 1000, 100, 100, 32, 128, mouseX, mouseY,
                 (info) -> {
                     List<Component> lines = new ArrayList<>();
 
@@ -39,10 +42,7 @@ public class PrismTestScreen extends Screen {
                 }
         );
 
-        PrismRenderer.renderVerticalFillContainer(guiGraphics, 200, 100, 32, 128, (float)1024 / (float)4096, Color.CYAN, Color.BLUE);
-
-        PrismRenderer.renderHorizontalFillContainer(guiGraphics, 300, 100, 128, 32, (float)2048 / (float)4096, Color.ORANGE, Color.RED);
-
-        PrismRenderer.renderProgressBar(guiGraphics, 400, 100, 32, 128, 0.75f, Color.RED, Color.GREEN, PrismDirection.UP);
+        guiGraphics.fill(200, 100, 232, 228, 0xaa000000);
+        PrismRenderer.renderFluidTankWithTooltip(guiGraphics, Fluids.LAVA, 500, 1000, 200, 100, 32, 128, mouseX, mouseY);
     }
 }
