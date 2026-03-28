@@ -11,7 +11,7 @@ Prism is a high-performance, developer-friendly UI and rendering library designe
 - 📐 **Adaptive Layouts**: Flex-box inspired PrismLayout system for automatic horizontal and vertical element positioning.
 - ✂️ **Precision Clipping**: Easy-to-use Scissor API for marquees, scrolling lists, and contained UI elements.
 
-![Demo of Prism API](images/demo-1.0.0.png)
+![Demo of Prism API](images/demo.gif)
 
 ## 🚀 Quick Start
 1. **Smooth Rendering**

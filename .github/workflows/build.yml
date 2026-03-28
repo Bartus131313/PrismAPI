@@ -1,5 +1,16 @@
 name: Build and Publish PrismAPI
-on: [push, pull_request]
+on:
+  push:
+    branches: [ "main" ]
+    paths-ignore:
+      - '**.md'      # Ignore all Markdown files
+      - 'images/**'  # Ignore everything in the images folder
+      - 'LICENSE'    # Ignore the license file
+  pull_request:
+    branches: [ "main" ]
+    paths-ignore:
+      - '**.md'
+      - 'images/**'
 
 jobs:
   build:
