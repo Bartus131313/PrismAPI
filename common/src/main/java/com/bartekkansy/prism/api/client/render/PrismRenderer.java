@@ -76,21 +76,45 @@ public class PrismRenderer {
         BufferBuilder builder = tesselator.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
 
         // Tiling Logic
+//        for (int drawX = 0; drawX < width; drawX += 16) {
+//            for (int drawY = 0; drawY < height; drawY += 16) {
+//                // Calculate how much of this specific 16x16 tile to draw
+//                int partWidth = Math.min(width - drawX, 16);
+//                int partHeight = Math.min(height - drawY, 16);
+//
+//                // Get valid screen coordinates
+//                int screenX = x + drawX;
+//                int screenY = y + (height - drawY) - partHeight;
+//
+//                // Get valid UVs
+//                float minU = sprite.getU0();
+//                float maxU = sprite.getU0() + (sprite.getU1() - sprite.getU0()) * (partWidth / 16.0f);
+//                float minV = sprite.getV0();
+//                float maxV = sprite.getV0() + (sprite.getV1() - sprite.getV0()) * (partHeight / 16.0f);
+//
+//                // Add vertices
+//                builder.addVertex(matrix, screenX, screenY + partHeight, zLevel).setUv(minU, maxV).setColor(r, g, b, a);
+//                builder.addVertex(matrix, screenX + partWidth, screenY + partHeight, zLevel).setUv(maxU, maxV).setColor(r, g, b, a);
+//                builder.addVertex(matrix, screenX + partWidth, screenY, zLevel).setUv(maxU, minV).setColor(r, g, b, a);
+//                builder.addVertex(matrix, screenX, screenY, zLevel).setUv(minU, minV).setColor(r, g, b, a);
+//            }
+//        }
+
+        // Tiling Logic
         for (int drawX = 0; drawX < width; drawX += 16) {
             for (int drawY = 0; drawY < height; drawY += 16) {
-                // Calculate how much of this specific 16x16 tile to draw
                 int partWidth = Math.min(width - drawX, 16);
                 int partHeight = Math.min(height - drawY, 16);
 
-                // Get valid screen coordinates
+                // Calculate how much of this specific 16x16 tile to draw
                 int screenX = x + drawX;
                 int screenY = y + (height - drawY) - partHeight;
 
                 // Get valid UVs
                 float minU = sprite.getU0();
                 float maxU = sprite.getU0() + (sprite.getU1() - sprite.getU0()) * (partWidth / 16.0f);
-                float minV = sprite.getV0();
-                float maxV = sprite.getV0() + (sprite.getV1() - sprite.getV0()) * (partHeight / 16.0f);
+                float maxV = sprite.getV1();
+                float minV = sprite.getV1() - (sprite.getV1() - sprite.getV0()) * (partHeight / 16.0f);
 
                 // Add vertices
                 builder.addVertex(matrix, screenX, screenY + partHeight, zLevel).setUv(minU, maxV).setColor(r, g, b, a);
@@ -103,8 +127,6 @@ public class PrismRenderer {
         // Upload the buffer to the GPU
         MeshData meshData = builder.build();
         if (meshData != null) BufferUploader.drawWithShader(meshData);
-
-        // No need to reset ShaderColor to 1.0F because we applied the color directly to the vertices.
     }
 
     /**
