@@ -1,6 +1,6 @@
 # 💎 Prism API
 
-### **The Ultimate Rendering Framework for Minecraft NeoForge.**
+### **The Ultimate Rendering Framework for Minecraft NeoForge/Fabric.**
 Prism is a high-performance, developer-friendly UI and rendering library designed to bridge the gap between "standard modded UIs" and "professional dashboard experiences." It provides a suite of tools for handling complex layouts, fluid dynamics, and butter-smooth animations with minimal boilerplate.
 
 ## ✨ Features
