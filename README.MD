@@ -85,11 +85,11 @@ repositories {
 
 dependencies {
     // For NeoForge Projects
-    implementation "com.github.bartekkansy:prism-neoforge:1.0.0"
+    implementation "com.github.Bartus131313:prism-neoforge:1.0.0"
 
     // For Fabric Projects
-    modImplementation "com.github.bartekkansy:prism-fabric:1.0.0"
-    include "com.github.bartekkansy:prism-fabric:1.0.0" // Optional: Jars-in-Jar
+    modImplementation "com.github.Bartus131313:prism-fabric:1.0.0"
+    include "com.github.Bartus131313:prism-fabric:1.0.0" // Optional: Jars-in-Jar
 }
 ```
 
