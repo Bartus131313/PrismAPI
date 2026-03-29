@@ -5,12 +5,16 @@ import com.bartekkansy.prism.api.client.ui.PrismAnimation;
 import com.bartekkansy.prism.api.client.ui.PrismDirection;
 import com.bartekkansy.prism.api.client.ui.PrismLayout;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.entity.ChestBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
@@ -81,6 +85,8 @@ public class TestScreen extends Screen {
             });
         }
     }
+
+    private static final ChestBlockEntity DUMMY_CHEST = new ChestBlockEntity(BlockPos.ZERO, Blocks.CHEST.defaultBlockState());
 
     @Override
     public void render(@NotNull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
@@ -170,7 +176,7 @@ public class TestScreen extends Screen {
                     if (y == 0) {
                         PrismRenderer.renderBlock3D(guiGraphics, Blocks.GOLD_BLOCK, x, y, z);
                         if (x % 2 != 0 && z % 2 != 0)
-                            PrismRenderer.renderBreakingTexture3D(guiGraphics, Blocks.GOLD_BLOCK.defaultBlockState(), 6, x, y, z);
+                            PrismRenderer.renderBreakingTexture3D(guiGraphics, Blocks.GOLD_BLOCK.defaultBlockState(), (int)(9 * smoothProgress), x, y, z);
                     }
 
                     // Layer 1: Center Core
@@ -199,7 +205,28 @@ public class TestScreen extends Screen {
         PrismRenderer.renderGradientStringCenteredXY(guiGraphics, font, Component.literal("Herobrine Altar"), 550, 220, 1f, Color.GREEN, Color.BLUE, false);
 
         PrismRenderer.enableCamera(guiGraphics, 150, 170, 1.5f, 30f, 225f);
+
         PrismRenderer.renderPiston3D(guiGraphics, Direction.UP, smoothProgress, 0, 0, 0);
+
+        PrismRenderer.renderCustom3D(guiGraphics, 1, 0, 0, (graphics, poseStack, bufferSource, pt) -> {
+            Minecraft mc = Minecraft.getInstance();
+
+            // Ensure the dummy chest knows about the world (needed for textures)
+            if (DUMMY_CHEST.getLevel() == null) DUMMY_CHEST.setLevel(mc.level);
+
+            // Get the vanilla Chest Renderer
+            var renderer = mc.getBlockEntityRenderDispatcher().getRenderer(DUMMY_CHEST);
+
+            if (renderer != null) {
+                // We can actually use the 'partialTick' parameter of the hook
+                // OR pass our custom openProgress directly if the renderer supports it.
+                // Most Chest renderers use the internal 'lidness' of the entity:
+                // DUMMY_CHEST.openness = openProgress;
+
+                renderer.render(DUMMY_CHEST, pt, poseStack, bufferSource, 15728880, OverlayTexture.NO_OVERLAY);
+            }
+        });
+
         PrismRenderer.disableCamera(guiGraphics);
     }
 }

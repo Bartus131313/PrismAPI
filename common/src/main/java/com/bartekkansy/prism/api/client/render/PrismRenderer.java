@@ -931,7 +931,7 @@ public class PrismRenderer {
         BlockRenderDispatcher dispatcher = Minecraft.getInstance().getBlockRenderer();
         MultiBufferSource.BufferSource bufferSource = guiGraphics.bufferSource();
 
-        // ⚡ CRITICAL FIX: Get the correct buffer for the block's render type (Solid, Cutout, etc.)
+        // Get the correct buffer for the block's render type (Solid, Cutout, etc.)
         // If we use a generic buffer, complex blocks like Pistons/Glass often turn invisible.
         RenderType type = ItemBlockRenderTypes.getChunkRenderType(state);
         VertexConsumer consumer = guiGraphics.bufferSource().getBuffer(type);
@@ -958,20 +958,20 @@ public class PrismRenderer {
      * @param direction The direction the piston is facing (e.g., Direction.UP)
      */
     public static void renderPiston3D(GuiGraphics guiGraphics, Direction direction, float progress, float gridX, float gridY, float gridZ) {
-        // 1. Determine if we should hide the head on the base
+        // Determine if we should hide the head on the base
         // If progress is 0, we show the normal retracted piston (wood included).
         // If progress > 0, we must set EXTENDED to true to hide the base's wooden part.
         boolean isExtended = progress > 0.0f;
 
-        // 2. Prepare the Base State
+        // Prepare the Base State
         BlockState baseState = Blocks.PISTON.defaultBlockState()
                 .setValue(PistonBaseBlock.FACING, direction)
                 .setValue(PistonBaseBlock.EXTENDED, isExtended);
 
-        // 3. Render the Base (Now just the stone part if progress > 0)
+        // Render the Base (Now just the stone part if progress > 0)
         renderBlock3D(guiGraphics, baseState, gridX, gridY, gridZ);
 
-        // 4. Render the Moving Head
+        // Render the Moving Head
         if (isExtended) {
             BlockState headState = Blocks.PISTON_HEAD.defaultBlockState()
                     .setValue(PistonHeadBlock.FACING, direction)
@@ -985,6 +985,24 @@ public class PrismRenderer {
 
             renderBlock3D(guiGraphics, headState, gridX + offX, gridY + offY, gridZ + offZ);
         }
+    }
+
+    /**
+     * The "Master Hook". This prepares the 3D space and then runs the developer's custom code.
+     * Use this for things Prism doesn't support yet, like custom Mobs, Particles, or complex Machines.
+     */
+    public static void renderCustom3D(GuiGraphics guiGraphics, float gridX, float gridY, float gridZ, IPrismCustomRenderer renderer) {
+        PoseStack poseStack = guiGraphics.pose();
+        poseStack.pushPose();
+
+        // Move to the grid position and center the "anchor point"
+        poseStack.translate(gridX - 0.5f, gridY - 0.5f, gridZ - 0.5f);
+
+        // Execute the developer's custom code
+        // We provide the poseStack so they can do their own rotations/scaling inside their block space
+        renderer.render(guiGraphics, poseStack, guiGraphics.bufferSource(), Minecraft.getInstance().getTimer().getGameTimeDeltaPartialTick(true));
+
+        poseStack.popPose();
     }
 
     /**
