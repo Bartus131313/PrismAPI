@@ -97,9 +97,6 @@ dependencies {
 
     // --- For Fabric Projects ---
     modImplementation "com.github.Bartus131313.PrismAPI:prism-api-fabric:${prism_version}"
-
-    // Optional: Include the API inside your mod jar (Jars-in-Jar)
-    // include "com.github.bartekkansy.PrismAPI:prism-api-fabric:${prism_version}"
 }
 ```
 
