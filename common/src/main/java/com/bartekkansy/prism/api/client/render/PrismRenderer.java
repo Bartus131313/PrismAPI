@@ -6,21 +6,40 @@ import com.bartekkansy.prism.api.fluid.FluidTankInfo;
 import com.bartekkansy.prism.api.fluid.IPrismFluidHelper;
 import com.bartekkansy.prism.api.util.PrismNumberFormatter;
 import com.bartekkansy.prism.api.util.PrismPlatform;
+import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
+import com.mojang.math.Axis;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.client.renderer.ItemBlockRenderTypes;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.block.BlockRenderDispatcher;
+import net.minecraft.client.renderer.entity.ItemRenderer;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.client.resources.model.ModelBakery;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.ComponentContents;
-import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.inventory.InventoryMenu;
+import net.minecraft.world.item.ItemDisplayContext;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.BlockAndTintGetter;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.piston.PistonBaseBlock;
+import net.minecraft.world.level.block.piston.PistonHeadBlock;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
 import org.joml.Matrix4f;
 
@@ -635,7 +654,7 @@ public class PrismRenderer {
      * @param colorEnd    Ending gradient color (ARGB).
      * @param shadow      Whether to draw a text shadow.
      */
-    public static void renderStringGradient(GuiGraphics guiGraphics, Font font, Component text, int x, int y, float scale, int colorStart, int colorEnd, boolean shadow) {
+    public static void renderGradientString(GuiGraphics guiGraphics, Font font, Component text, int x, int y, float scale, int colorStart, int colorEnd, boolean shadow) {
         guiGraphics.pose().pushPose();
         guiGraphics.pose().translate(x, y, 0);
         guiGraphics.pose().scale(scale, scale, 1.0f);
@@ -676,10 +695,10 @@ public class PrismRenderer {
     /**
      * Renders a gradient colored string using a {@link Color} objects.
      *
-     * @see #renderStringGradient(GuiGraphics, Font, Component, int, int, float, int, int, boolean)
+     * @see #renderGradientString(GuiGraphics, Font, Component, int, int, float, int, int, boolean)
      */
-    public static void renderStringGradient(GuiGraphics guiGraphics, Font font, Component text, int x, int y, float scale, Color colorStart, Color colorEnd, boolean shadow) {
-        renderStringGradient(guiGraphics, font, text, x, y, scale, colorStart.getRGB(), colorEnd.getRGB(), shadow);
+    public static void renderGradientString(GuiGraphics guiGraphics, Font font, Component text, int x, int y, float scale, Color colorStart, Color colorEnd, boolean shadow) {
+        renderGradientString(guiGraphics, font, text, x, y, scale, colorStart.getRGB(), colorEnd.getRGB(), shadow);
     }
 
     /**
@@ -691,20 +710,20 @@ public class PrismRenderer {
      * </p>
      *
      * @param x The horizontal center point.
-     * @see #renderStringGradient(GuiGraphics, Font, Component, int, int, float, int, int, boolean)
+     * @see #renderGradientString(GuiGraphics, Font, Component, int, int, float, int, int, boolean)
      */
-    public static void renderStringGradientCenteredX(GuiGraphics guiGraphics, Font font, Component text, int x, int y, float scale, int colorStart, int colorEnd, boolean shadow) {
+    public static void renderGradientStringCenteredX(GuiGraphics guiGraphics, Font font, Component text, int x, int y, float scale, int colorStart, int colorEnd, boolean shadow) {
         float width = font.width(text) * scale;
-        renderStringGradient(guiGraphics, font, text, (int)(x - width / 2), y, scale, colorStart, colorEnd, shadow);
+        renderGradientString(guiGraphics, font, text, (int)(x - width / 2), y, scale, colorStart, colorEnd, shadow);
     }
 
     /**
      * Renders a string centered horizontally using a gradient with {@link Color} objects.
      *
-     * @see #renderStringGradientCenteredX(GuiGraphics, Font, Component, int, int, float, int, int, boolean)
+     * @see #renderGradientStringCenteredX(GuiGraphics, Font, Component, int, int, float, int, int, boolean)
      */
-    public static void renderStringGradientCenteredX(GuiGraphics guiGraphics, Font font, Component text, int x, int y, float scale, Color colorStart, Color colorEnd, boolean shadow) {
-        renderStringGradientCenteredX(guiGraphics, font, text, x, y, scale, colorStart.getRGB(), colorEnd.getRGB(), shadow);
+    public static void renderGradientStringCenteredX(GuiGraphics guiGraphics, Font font, Component text, int x, int y, float scale, Color colorStart, Color colorEnd, boolean shadow) {
+        renderGradientStringCenteredX(guiGraphics, font, text, x, y, scale, colorStart.getRGB(), colorEnd.getRGB(), shadow);
     }
 
     /**
@@ -716,20 +735,20 @@ public class PrismRenderer {
      * </p>
      *
      * @param y The vertical center point.
-     * @see #renderStringGradient(GuiGraphics, Font, Component, int, int, float, int, int, boolean)
+     * @see #renderGradientString(GuiGraphics, Font, Component, int, int, float, int, int, boolean)
      */
-    public static void renderStringGradientCenteredY(GuiGraphics guiGraphics, Font font, Component text, int x, int y, float scale, int colorStart, int colorEnd, boolean shadow) {
+    public static void renderGradientStringCenteredY(GuiGraphics guiGraphics, Font font, Component text, int x, int y, float scale, int colorStart, int colorEnd, boolean shadow) {
         float height = font.lineHeight * scale;
-        renderStringGradient(guiGraphics, font, text, x, (int)(y - height / 2), scale, colorStart, colorEnd, shadow);
+        renderGradientString(guiGraphics, font, text, x, (int)(y - height / 2), scale, colorStart, colorEnd, shadow);
     }
 
     /**
      * Renders a string centered vertically using a gradient with {@link Color} objects.
      *
-     * @see #renderStringGradientCenteredY(GuiGraphics, Font, Component, int, int, float, int, int, boolean)
+     * @see #renderGradientStringCenteredY(GuiGraphics, Font, Component, int, int, float, int, int, boolean)
      */
-    public static void renderStringGradientCenteredY(GuiGraphics guiGraphics, Font font, Component text, int x, int y, float scale, Color colorStart, Color colorEnd, boolean shadow) {
-        renderStringGradientCenteredY(guiGraphics, font, text, x, y, scale, colorStart.getRGB(), colorEnd.getRGB(), shadow);
+    public static void renderGradientStringCenteredY(GuiGraphics guiGraphics, Font font, Component text, int x, int y, float scale, Color colorStart, Color colorEnd, boolean shadow) {
+        renderGradientStringCenteredY(guiGraphics, font, text, x, y, scale, colorStart.getRGB(), colorEnd.getRGB(), shadow);
     }
 
     /**
@@ -742,20 +761,297 @@ public class PrismRenderer {
      *
      * @param x The horizontal center point.
      * @param y The vertical center point.
-     * @see #renderStringGradient(GuiGraphics, Font, Component, int, int, float, int, int, boolean)
+     * @see #renderGradientString(GuiGraphics, Font, Component, int, int, float, int, int, boolean)
      */
-    public static void renderStringGradientCenteredXY(GuiGraphics guiGraphics, Font font, Component text, int x, int y, float scale, int colorStart, int colorEnd, boolean shadow) {
+    public static void renderGradientStringCenteredXY(GuiGraphics guiGraphics, Font font, Component text, int x, int y, float scale, int colorStart, int colorEnd, boolean shadow) {
         float width = font.width(text) * scale;
         float height = font.lineHeight * scale;
-        renderStringGradient(guiGraphics, font, text, (int)(x - width / 2), (int)(y - height / 2), scale, colorStart, colorEnd, shadow);
+        renderGradientString(guiGraphics, font, text, (int)(x - width / 2), (int)(y - height / 2), scale, colorStart, colorEnd, shadow);
     }
 
     /**
      * Renders a string centered vertically and horizontally using a gradient with {@link Color} objects.
      *
-     * @see #renderStringGradientCenteredXY(GuiGraphics, Font, Component, int, int, float, int, int, boolean)
+     * @see #renderGradientStringCenteredXY(GuiGraphics, Font, Component, int, int, float, int, int, boolean)
      */
-    public static void renderStringGradientCenteredXY(GuiGraphics guiGraphics, Font font, Component text, int x, int y, float scale, Color colorStart, Color colorEnd, boolean shadow) {
-        renderStringGradientCenteredXY(guiGraphics, font, text, x, y, scale, colorStart.getRGB(), colorEnd.getRGB(), shadow);
+    public static void renderGradientStringCenteredXY(GuiGraphics guiGraphics, Font font, Component text, int x, int y, float scale, Color colorStart, Color colorEnd, boolean shadow) {
+        renderGradientStringCenteredXY(guiGraphics, font, text, x, y, scale, colorStart.getRGB(), colorEnd.getRGB(), shadow);
+    }
+
+    /**
+     * Renders a single Block/Item icon centered at a specific GUI position.
+     * <p>
+     * Unlike vanilla item rendering, this method centers the block on the provided coordinates
+     * and automatically adjusts lighting based on whether the model is a solid block
+     * (3D lighting) or a flat item/plant (Flat lighting).
+     *
+     * @param guiGraphics The current GuiGraphics instance from the render call.
+     * @param block       The block to be rendered.
+     * @param x           The screen X-coordinate for the CENTER of the block.
+     * @param y           The screen Y-coordinate for the CENTER of the block.
+     * @param scale       The scale multiplier (1.0 = 16x16 pixels).
+     */
+    public static void renderBlockAsItem(GuiGraphics guiGraphics, Block block, int x, int y, float scale) {
+        ItemStack stack = block.asItem().getDefaultInstance();
+        if (stack.isEmpty()) return;
+
+        PoseStack poseStack = guiGraphics.pose();
+        poseStack.pushPose();
+
+        // Move exactly to X and Y.
+        // Because of how the scaling works next, this X and Y is now the absolute CENTER of the block.
+        poseStack.translate(x, y, 150.0F);
+
+        // Scale and Flip.
+        // - Vanilla base size is 16. We multiply by your custom scale.
+        // - We make the Y-scale NEGATIVE to flip the 3D block right-side up for the GUI.
+        float finalScale = 16.0F * scale;
+        poseStack.scale(finalScale, -finalScale, finalScale);
+
+        // Setup rendering components
+        Minecraft mc = Minecraft.getInstance();
+        ItemRenderer itemRenderer = mc.getItemRenderer();
+        BakedModel model = itemRenderer.getModel(stack, null, null, 0);
+
+        // Dynamic Lighting
+        // Solid blocks need 3D lighting, but flat blocks (like Saplings/Flowers) need flat lighting.
+        boolean usesBlockLight = model.usesBlockLight();
+        if (usesBlockLight) {
+            Lighting.setupFor3DItems();
+        } else {
+            Lighting.setupForFlatItems();
+        }
+
+        MultiBufferSource.BufferSource bufferSource = guiGraphics.bufferSource();
+
+        // Render the Model
+        itemRenderer.render(stack, ItemDisplayContext.GUI, false, poseStack, bufferSource,
+                15728880, // Full Brightness
+                OverlayTexture.NO_OVERLAY,
+                model
+        );
+
+        // Flush to draw immediately
+        guiGraphics.flush();
+
+        // Reset lighting back to default for the rest of the UI
+        Lighting.setupFor3DItems();
+
+        poseStack.popPose();
+    }
+
+    /**
+     * Initializes a 3D rendering context within a 2D GUI.
+     * <p>
+     * This method "transforms" the screen at the specified (x, y) into a 3D world space.
+     * It enables the Depth Buffer, allowing blocks rendered with {@link #renderBlock3D}
+     * to overlap correctly regardless of draw order.
+     * <p>
+     * <b>Note:</b> Every call to {@code enableCamera} MUST be followed by a {@link #disableCamera} call.
+     *
+     * @param guiGraphics The current GuiGraphics instance.
+     * @param x           The screen X-position where the 3D structure's origin will be.
+     * @param y           The screen Y-position where the 3D structure's origin will be.
+     * @param scale       Global scale of the 3D objects.
+     * @param rotX        Camera rotation around the X-axis (Pitch). Try 30.0F for isometric.
+     * @param rotY        Camera rotation around the Y-axis (Yaw). Try 225.0F for isometric.
+     */
+    public static void enableCamera(GuiGraphics guiGraphics, int x, int y, float scale, float rotX, float rotY) {
+        PoseStack poseStack = guiGraphics.pose();
+        poseStack.pushPose();
+
+        // Move camera to the X/Y position on the screen
+        // We push Z to 200 so the blocks have 3D space to exist without clipping into the background
+        poseStack.translate(x, y, 200.0F);
+
+        // Scale up to block size and flip the Y axis (GUI is Y-down, World is Y-up)
+        float finalScale = 16.0F * scale;
+        poseStack.scale(finalScale, -finalScale, finalScale);
+
+        // Apply Camera Rotation
+        poseStack.mulPose(Axis.XP.rotationDegrees(rotX));
+        poseStack.mulPose(Axis.YP.rotationDegrees(rotY));
+
+        // RenderSystem.setShader(GameRenderer::getPositionTexShader);
+
+        // Enable Depth Buffer (The magic that makes overlapping blocks work)
+        RenderSystem.enableDepthTest();
+
+        // Setup lighting so blocks aren't pitch black
+        Lighting.setupFor3DItems();
+    }
+
+    /**
+     * Finalizes the 3D rendering context and flushes the buffer to the screen.
+     * <p>
+     * This method resets the RenderSystem's depth state and lighting to prevent
+     * 3D settings from "leaking" into the rest of the 2D GUI (like text or buttons).
+     *
+     * @param guiGraphics The current GuiGraphics instance.
+     * @throws IllegalStateException if called without a preceding {@link #enableCamera} call.
+     */
+    public static void disableCamera(GuiGraphics guiGraphics) {
+        // We must end the batch before popping the pose!
+        // If we pop the pose before flushing, the blocks will draw in the wrong place.
+        guiGraphics.bufferSource().endBatch();
+
+        // Turn off 3D depth so normal tooltips and text don't break
+        RenderSystem.disableDepthTest();
+
+        // Pop the camera matrix
+        guiGraphics.pose().popPose();
+    }
+
+    /**
+     * Renders a specific BlockState at a grid-based coordinate within an active camera context.
+     * <p>
+     * Coordinates are in "Block Units" where 1.0 represents the width of one full block.
+     * The block is automatically centered so that (0, 0, 0) is the middle of the structure.
+     *
+     * @param guiGraphics The current GuiGraphics instance.
+     * @param state       The specific BlockState to render (supports rotation, properties, etc.).
+     * @param gridX       Position on the X-axis (Right/Left).
+     * @param gridY       Position on the Y-axis (Up/Down).
+     * @param gridZ       Position on the Z-axis (Forward/Back).
+     * @see #enableCamera(GuiGraphics, int, int, float, float, float)
+     */
+    public static void renderBlock3D(GuiGraphics guiGraphics, BlockState state, float gridX, float gridY, float gridZ) {
+        PoseStack poseStack = guiGraphics.pose();
+
+        // Push a temporary pose just for this single block
+        poseStack.pushPose();
+
+        // Translate by standard Minecraft block coordinates (1.0 = 1 block)
+        // We center the block by shifting it by -0.5, allowing structures to rotate nicely around their center
+        poseStack.translate(gridX - 0.5f, gridY - 0.5f, gridZ - 0.5f);
+
+        // Ensure the correct shader is set for 3D blocks
+        RenderSystem.setShader(GameRenderer::getPositionTexShader);
+
+        BlockRenderDispatcher dispatcher = Minecraft.getInstance().getBlockRenderer();
+        MultiBufferSource.BufferSource bufferSource = guiGraphics.bufferSource();
+
+        // ⚡ CRITICAL FIX: Get the correct buffer for the block's render type (Solid, Cutout, etc.)
+        // If we use a generic buffer, complex blocks like Pistons/Glass often turn invisible.
+        RenderType type = ItemBlockRenderTypes.getChunkRenderType(state);
+        VertexConsumer consumer = guiGraphics.bufferSource().getBuffer(type);
+
+        // Render the BlockState directly
+        dispatcher.renderSingleBlock(state, poseStack, bufferSource,
+                15728880, // Full Brightness
+                OverlayTexture.NO_OVERLAY);
+
+        poseStack.popPose();
+    }
+
+    /**
+     * Overload for {@link #renderBlock3D(GuiGraphics, BlockState, float, float, float)}
+     * using the default state of a Block.
+     */
+    public static void renderBlock3D(GuiGraphics guiGraphics, Block block, float gridX, float gridY, float gridZ) {
+        renderBlock3D(guiGraphics, block.defaultBlockState(), gridX, gridY, gridZ);
+    }
+
+    /**
+     * Renders a piston extending or retracting.
+     * @param progress 0.0 (retracted) to 1.0 (fully extended)
+     * @param direction The direction the piston is facing (e.g., Direction.UP)
+     */
+    public static void renderPiston3D(GuiGraphics guiGraphics, Direction direction, float progress, float gridX, float gridY, float gridZ) {
+        // 1. Determine if we should hide the head on the base
+        // If progress is 0, we show the normal retracted piston (wood included).
+        // If progress > 0, we must set EXTENDED to true to hide the base's wooden part.
+        boolean isExtended = progress > 0.0f;
+
+        // 2. Prepare the Base State
+        BlockState baseState = Blocks.PISTON.defaultBlockState()
+                .setValue(PistonBaseBlock.FACING, direction)
+                .setValue(PistonBaseBlock.EXTENDED, isExtended);
+
+        // 3. Render the Base (Now just the stone part if progress > 0)
+        renderBlock3D(guiGraphics, baseState, gridX, gridY, gridZ);
+
+        // 4. Render the Moving Head
+        if (isExtended) {
+            BlockState headState = Blocks.PISTON_HEAD.defaultBlockState()
+                    .setValue(PistonHeadBlock.FACING, direction)
+                    // Short = true makes the 'arm' of the piston head shorter (used for the base connection)
+                    .setValue(PistonHeadBlock.SHORT, false);
+
+            // Calculate movement offset
+            float offX = direction.getStepX() * progress;
+            float offY = direction.getStepY() * progress;
+            float offZ = direction.getStepZ() * progress;
+
+            renderBlock3D(guiGraphics, headState, gridX + offX, gridY + offY, gridZ + offZ);
+        }
+    }
+
+    /**
+     * Renders a 3D block-breaking "crack" overlay at a specific grid position within the 3D camera context.
+     * <p>
+     * This method uses the vanilla {@link BlockRenderDispatcher} to map the crumbling texture
+     * perfectly onto the geometry of the provided {@link BlockState}. This ensures that
+     * complex shapes like stairs, slabs, or walls show cracks that follow their actual 3D model.
+     * <p>
+     * <b>Requirements:</b> This must be called between {@link #enableCamera} and {@link #disableCamera}.
+     *
+     * @param guiGraphics The current GuiGraphics instance.
+     * @param state       The BlockState whose shape the cracks should follow (e.g., {@code Blocks.STONE.defaultBlockState()}).
+     * @param stage       The destruction stage, ranging from 0 (light cracks) to 9 (near broken).
+     * Values outside 0-9 will result in no rendering.
+     * @param gridX       The relative X-coordinate in the 3D grid.
+     * @param gridY       The relative Y-coordinate in the 3D grid.
+     * @param gridZ       The relative Z-coordinate in the 3D grid.
+     * @see #enableCamera(GuiGraphics, int, int, float, float, float)
+     * @see #renderBlock3D(GuiGraphics, BlockState, float, float, float)
+     */
+    public static void renderBreakingTexture3D(GuiGraphics guiGraphics, BlockState state, int stage, float gridX, float gridY, float gridZ) {
+        if (stage < 0 || stage > 9) return;
+
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.level == null) return;
+
+        PoseStack poseStack = guiGraphics.pose();
+        poseStack.pushPose();
+
+        // 1. Position with a tiny Z-offset to prevent Z-fighting
+        poseStack.translate(gridX - 0.5f, gridY - 0.5f, gridZ - 0.495f);
+        poseStack.scale(1.001f, 1.001f, 1.001f); // Tiny scale up to wrap the block
+
+        // 2. THE SECRET SAUCE: SheetedDecalTextureGenerator
+        // This takes the standard block model and "re-paints" the breaking texture over it.
+        MultiBufferSource.BufferSource bufferSource = guiGraphics.bufferSource();
+
+        // Get the texture atlas for the crumbling blocks
+        var crumblingTex = ModelBakery.DESTROY_TYPES.get(stage);
+
+        // We create a special consumer that redirects the block's vertices
+        // to use the crumbling texture instead of its normal texture.
+        VertexConsumer crackingConsumer = new SheetedDecalTextureGenerator(
+                bufferSource.getBuffer(crumblingTex),
+                poseStack.last(),
+                1.0f // Scale of the decal
+        );
+
+        // 3. Render the block model using our Cracking Consumer
+        // We use the ModelRenderer directly here for maximum control
+        mc.getBlockRenderer().getModelRenderer().tesselateBlock(
+                mc.level,
+                mc.getBlockRenderer().getBlockModel(state),
+                state,
+                BlockPos.ZERO,
+                poseStack,
+                crackingConsumer,
+                false, // Don't use checkSides (we want to see all cracks)
+                mc.level.random,
+                state.getSeed(BlockPos.ZERO),
+                OverlayTexture.NO_OVERLAY
+        );
+
+        // 4. Force the draw call immediately
+        guiGraphics.flush();
+
+        poseStack.popPose();
     }
 }

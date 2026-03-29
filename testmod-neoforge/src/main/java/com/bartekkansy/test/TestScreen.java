@@ -7,8 +7,12 @@ import com.bartekkansy.prism.api.client.ui.PrismLayout;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
 import org.jetbrains.annotations.NotNull;
 
@@ -86,14 +90,16 @@ public class TestScreen extends Screen {
         lastMs = now;
 
         // Toggle target every 3 seconds for demo purposes
-        this.targetProgress = (now % 6000 < 3000) ? 1.0f : 0.0f;
+        // this.targetProgress = (now % 6000 < 3000) ? 1.0f : 0.0f;
+        this.targetProgress = (now % 6000 < 3000) ? (float) (now % 3000) / 3000 : 1f - (float) (now % 3000) / 3000;
+        this.smoothProgress = PrismAnimation.easeInOutCubic(this.targetProgress);
         // Smoothly interpolate the progress value
-        this.smoothProgress = PrismAnimation.lerp(smoothProgress, targetProgress, deltaTime * 3.5f);
+        // this.smoothProgress = PrismAnimation.lerp(smoothProgress, targetProgress, deltaTime * 3.5f);
 
         this.renderBackground(guiGraphics, mouseX, mouseY, partialTick);
 
         // --- 2. HEADER ---
-        PrismRenderer.renderStringGradientCenteredX(guiGraphics, font, Component.literal("PRISM FRAMEWORK").withStyle(ChatFormatting.BOLD),
+        PrismRenderer.renderGradientStringCenteredX(guiGraphics, font, Component.literal("PRISM FRAMEWORK").withStyle(ChatFormatting.BOLD),
                 width / 2, 20, 2.5f, Color.RED, Color.BLUE, true);
 
         // --- 3. DRAW LAYOUTS ---
@@ -113,7 +119,7 @@ public class TestScreen extends Screen {
         PrismRenderer.renderProgressBar(guiGraphics, gridX + 30, gridY + 25, 40, 10, smoothProgress, Color.PINK, PrismDirection.RIGHT);
 
         // --- 5. TEXTURED PROGRESS (UV CLIPPING) ---
-        int texX = width - 60;
+        int texX = width - 100;
         int texY = 60;
         // Feature: Textured Progress with automatic UV calculation
         PrismRenderer.renderProgressBarTexture(guiGraphics, FURNACE_GUI, texX, texY, 24, 17, smoothProgress, 79, 34, PrismDirection.RIGHT);
@@ -130,7 +136,7 @@ public class TestScreen extends Screen {
         String text = "SCISSOR CLIPPING ENABLED • LERPING ACTIVE • RENDER ENGINE STABLE";
 
         // Logic: Text slides from left to right based on smoothProgress
-        int scroll = (int)(smoothProgress * (font.width(text) + 5)) - font.width(text);
+        int scroll = (int) (smoothProgress * (mWidth - font.width(text)));
 
         // Now using the [Component -> Coordinates] signature
         PrismRenderer.renderString(
@@ -147,11 +153,53 @@ public class TestScreen extends Screen {
         PrismRenderer.stopScissor(guiGraphics);
 
         // --- 7. THE REQUESTED WATERMARK (Bottom Left) ---
-        PrismRenderer.renderString(guiGraphics, font, Component.literal("Prism API v1.0.0").withStyle(ChatFormatting.ITALIC),
+        PrismRenderer.renderString(guiGraphics, font, Component.literal("Prism API v1.0.1").withStyle(ChatFormatting.ITALIC),
                 10, height - 15, 0.8f, Color.LIGHT_GRAY, false);
 
         // Final Watermark details
         PrismRenderer.renderString(guiGraphics, font, Component.literal("DEVELOPER BUILD - BK"),
                 10, height - 25, 0.5f, Color.GRAY, false);
+
+        // Turn on the 3D Engine at screen coordinates, Scale 2.0x, Isometric View
+        PrismRenderer.enableCamera(guiGraphics, 550, 180, 1.0f, 30f, 225f + 360f * smoothProgress);
+
+        for (int x = -1; x <= 1; x++) {
+            for (int z = -1; z <= 1; z++) {
+                for (int y = 0; y < 3; y++) {
+                    // Layer 0: 3x3 Gold Base
+                    if (y == 0) {
+                        PrismRenderer.renderBlock3D(guiGraphics, Blocks.GOLD_BLOCK, x, y, z);
+                        if (x % 2 != 0 && z % 2 != 0)
+                            PrismRenderer.renderBreakingTexture3D(guiGraphics, Blocks.GOLD_BLOCK.defaultBlockState(), 6, x, y, z);
+                    }
+
+                    // Layer 1: Center Core
+                    else if (x == 0 && y == 1 && z == 0) {
+                        PrismRenderer.renderBlock3D(guiGraphics, Blocks.NETHERRACK, x, y, z);
+                    }
+
+                    // Layer 1: The "Cross" of Redstone Torches
+                    // Condition: (Abs X + Abs Z == 1) ensures it's North, South, East, or West of center
+                    else if (y == 1 && (Math.abs(x) + Math.abs(z) == 1)) {
+                        PrismRenderer.renderBlock3D(guiGraphics, Blocks.REDSTONE_TORCH, x, y, z);
+                    }
+
+                    // Layer 2: Fire on top of the Core
+                    else if (x == 0 && y == 2 && z == 0) {
+                        PrismRenderer.renderBlock3D(guiGraphics, Blocks.FIRE, x, y, z);
+                    }
+                }
+            }
+        }
+
+        // Turn off the engine and flush the renders
+        PrismRenderer.disableCamera(guiGraphics);
+
+        // Draw normal 2D GUI stuff over it
+        PrismRenderer.renderGradientStringCenteredXY(guiGraphics, font, Component.literal("Herobrine Altar"), 550, 220, 1f, Color.GREEN, Color.BLUE, false);
+
+        PrismRenderer.enableCamera(guiGraphics, 150, 170, 1.5f, 30f, 225f);
+        PrismRenderer.renderPiston3D(guiGraphics, Direction.UP, smoothProgress, 0, 0, 0);
+        PrismRenderer.disableCamera(guiGraphics);
     }
 }
