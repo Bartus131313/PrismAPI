@@ -15,7 +15,14 @@ Prism is a high-performance, developer-friendly UI and rendering library designe
 - 📐 **Adaptive Layouts**: Flex-box inspired PrismLayout system for automatic horizontal and vertical element positioning.
 - ✂️ **Precision Clipping**: Easy-to-use Scissor API for marquees, scrolling lists, and contained UI elements.
 
-![Demo of Prism API](images/demo.gif)
+## 📒 Change logs
+| Version                       | Description                              |
+|-------------------------------|------------------------------------------|
+| [v1.0.0](changelogs/1.0.0.MD) | The first official release of Prism API. |
+| [v1.0.1](changelogs/1.0.1.MD) | Various 3D rendering functions.          |
+
+## 🔨 Demo of the latest version
+![Demo of Prism API](images/demo-v1.0.1.gif)
 
 ## 🚀 Quick Start
 1. **Smooth Rendering**
@@ -85,7 +92,7 @@ layout.drawHorizontal(guiGraphics, centerX, centerY, mouseX, mouseY);
 ## 📦 Installation
 Add the following to your build.gradle:
 ```groovy
-def prism_version = "v1.0.0" // Replace with the version you want (e.g., v1.0.0 or main-SNAPSHOT)
+def prism_version = "main-SNAPSHOT" // Replace with the version you want (e.g., v1.0.0 or main-SNAPSHOT)
 
 repositories {
     maven { url "https://jitpack.io" }
