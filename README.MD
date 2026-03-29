@@ -85,7 +85,7 @@ layout.drawHorizontal(guiGraphics, centerX, centerY, mouseX, mouseY);
 ## 📦 Installation
 Add the following to your build.gradle:
 ```groovy
-def prism_version = "1.0.0" // Replace with the version you want (e.g., v1.0.0 or main-SNAPSHOT)
+def prism_version = "v1.0.0" // Replace with the version you want (e.g., v1.0.0 or main-SNAPSHOT)
 
 repositories {
     maven { url "https://jitpack.io" }
@@ -93,10 +93,10 @@ repositories {
 
 dependencies {
     // --- For NeoForge Projects ---
-    implementation "com.github.bartekkansy.PrismAPI:prism-api-neoforge:${prism_version}"
+    implementation "com.github.Bartus131313.PrismAPI:prism-api-neoforge:${prism_version}"
 
     // --- For Fabric Projects ---
-    modImplementation "com.github.bartekkansy.PrismAPI:prism-api-fabric:${prism_version}"
+    modImplementation "com.github.Bartus131313.PrismAPI:prism-api-fabric:${prism_version}"
 
     // Optional: Include the API inside your mod jar (Jars-in-Jar)
     // include "com.github.bartekkansy.PrismAPI:prism-api-fabric:${prism_version}"
