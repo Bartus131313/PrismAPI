@@ -1,3 +1,7 @@
+![Release](https://jitpack.io/v/Bartus131313/PrismAPI.svg)
+![Last Commit](https://img.shields.io/github/last-commit/Bartus131313/PrismAPI?color=blue)
+![License](https://img.shields.io/github/license/Bartus131313/PrismAPI?color=green)
+
 # 💎 Prism API
 
 ### **The Ultimate Rendering Framework for Minecraft NeoForge/Fabric.**
