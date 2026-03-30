@@ -1,4 +1,4 @@
-package com.bartekkansy.prism.api.client.render;
+package com.bartekkansy.prism.api.client.render.world;
 
 import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
