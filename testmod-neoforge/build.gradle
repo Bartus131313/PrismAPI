@@ -35,6 +35,9 @@ repositories {
         name = 'NeoForged'
         url = 'https://maven.neoforged.net/releases'
     }
+
+    mavenCentral()
+    maven { url 'https://www.jitpack.io' }
 }
 
 loom {
@@ -47,8 +50,13 @@ loom {
     }
 }
 
+// def prism_version = "dev~1.1.0-1c2071a3e7-1"
+
 dependencies {
     neoForge "net.neoforged:neoforge:${rootProject.neoforge_version}"
+
+    // modImplementation "com.github.Bartus131313.PrismAPI:prism-api-neoforge:${prism_version}"
+    // implementation "com.bartekkansy:prism-api-neoforge:${prism_version}"
 
     // Use 'implementation' for the common project
     implementation project(":common")

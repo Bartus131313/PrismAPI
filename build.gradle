@@ -63,9 +63,27 @@ subprojects {
     }
 
     tasks.withType(Javadoc).configureEach {
+        source(sourceSets.main.allJava)
+
+        if (project.name != 'common') {
+            source(project(":common").sourceSets.main.allJava)
+            classpath += project(":common").sourceSets.main.compileClasspath
+        }
+
         classpath += sourceSets.main.compileClasspath
+
         options.encoding = 'UTF-8'
         options.addStringOption('Xdoclint:none', '-quiet')
+    }
+
+    tasks.named('sourcesJar', Jar) {
+        duplicatesStrategy = DuplicatesStrategy.INCLUDE
+
+        from sourceSets.main.allJava
+
+        if (project.name != 'common') {
+            from project(":common").sourceSets.main.allJava
+        }
     }
 
     // Configure Maven publishing.
@@ -74,10 +92,6 @@ subprojects {
             mavenJava(MavenPublication) {
                 artifactId = base.archivesName.get()
                 from components.java
-
-                if (tasks.findByName("javadocJar")) {
-                    artifact(tasks.javadocJar)
-                }
             }
         }
 
