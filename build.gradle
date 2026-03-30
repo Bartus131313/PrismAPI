@@ -72,9 +72,6 @@ subprojects {
             mavenJava(MavenPublication) {
                 artifactId = base.archivesName.get()
                 from components.java
-
-                artifact(tasks.javadocJar)
-                artifact(tasks.sourcesJar)
             }
         }
 
