@@ -1,5 +1,7 @@
 package com.bartekkansy.prism.api.client.render;
 
+import com.bartekkansy.prism.api.client.render.world.PrismCamera;
+import com.bartekkansy.prism.api.client.render.world.PrismVirtualSpace;
 import com.bartekkansy.prism.api.client.ui.PrismAnimation;
 import com.bartekkansy.prism.api.client.ui.PrismDirection;
 import com.bartekkansy.prism.api.fluid.FluidTankInfo;
@@ -9,7 +11,6 @@ import com.bartekkansy.prism.api.util.PrismPlatform;
 import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
-import com.mojang.math.Axis;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -29,17 +30,16 @@ import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.piston.PistonBaseBlock;
 import net.minecraft.world.level.block.piston.PistonHeadBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluid;
-import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
 import org.joml.Matrix4f;
 
@@ -841,68 +841,6 @@ public class PrismRenderer {
     }
 
     /**
-     * Initializes a 3D rendering context within a 2D GUI.
-     * <p>
-     * This method "transforms" the screen at the specified (x, y) into a 3D world space.
-     * It enables the Depth Buffer, allowing blocks rendered with {@link #renderBlock3D}
-     * to overlap correctly regardless of draw order.
-     * <p>
-     * <b>Note:</b> Every call to {@code enableCamera} MUST be followed by a {@link #disableCamera} call.
-     *
-     * @param guiGraphics The current GuiGraphics instance.
-     * @param x           The screen X-position where the 3D structure's origin will be.
-     * @param y           The screen Y-position where the 3D structure's origin will be.
-     * @param scale       Global scale of the 3D objects.
-     * @param rotX        Camera rotation around the X-axis (Pitch). Try 30.0F for isometric.
-     * @param rotY        Camera rotation around the Y-axis (Yaw). Try 225.0F for isometric.
-     */
-    public static void enableCamera(GuiGraphics guiGraphics, int x, int y, float scale, float rotX, float rotY) {
-        PoseStack poseStack = guiGraphics.pose();
-        poseStack.pushPose();
-
-        // Move camera to the X/Y position on the screen
-        // We push Z to 200 so the blocks have 3D space to exist without clipping into the background
-        poseStack.translate(x, y, 200.0F);
-
-        // Scale up to block size and flip the Y axis (GUI is Y-down, World is Y-up)
-        float finalScale = 16.0F * scale;
-        poseStack.scale(finalScale, -finalScale, finalScale);
-
-        // Apply Camera Rotation
-        poseStack.mulPose(Axis.XP.rotationDegrees(rotX));
-        poseStack.mulPose(Axis.YP.rotationDegrees(rotY));
-
-        // RenderSystem.setShader(GameRenderer::getPositionTexShader);
-
-        // Enable Depth Buffer (The magic that makes overlapping blocks work)
-        RenderSystem.enableDepthTest();
-
-        // Setup lighting so blocks aren't pitch black
-        Lighting.setupFor3DItems();
-    }
-
-    /**
-     * Finalizes the 3D rendering context and flushes the buffer to the screen.
-     * <p>
-     * This method resets the RenderSystem's depth state and lighting to prevent
-     * 3D settings from "leaking" into the rest of the 2D GUI (like text or buttons).
-     *
-     * @param guiGraphics The current GuiGraphics instance.
-     * @throws IllegalStateException if called without a preceding {@link #enableCamera} call.
-     */
-    public static void disableCamera(GuiGraphics guiGraphics) {
-        // We must end the batch before popping the pose!
-        // If we pop the pose before flushing, the blocks will draw in the wrong place.
-        guiGraphics.bufferSource().endBatch();
-
-        // Turn off 3D depth so normal tooltips and text don't break
-        RenderSystem.disableDepthTest();
-
-        // Pop the camera matrix
-        guiGraphics.pose().popPose();
-    }
-
-    /**
      * Renders a specific BlockState at a grid-based coordinate within an active camera context.
      * <p>
      * Coordinates are in "Block Units" where 1.0 represents the width of one full block.
@@ -913,7 +851,7 @@ public class PrismRenderer {
      * @param gridX       Position on the X-axis (Right/Left).
      * @param gridY       Position on the Y-axis (Up/Down).
      * @param gridZ       Position on the Z-axis (Forward/Back).
-     * @see #enableCamera(GuiGraphics, int, int, float, float, float)
+     * @see PrismCamera
      */
     public static void renderBlock3D(GuiGraphics guiGraphics, BlockState state, float gridX, float gridY, float gridZ) {
         PoseStack poseStack = guiGraphics.pose();
@@ -950,6 +888,40 @@ public class PrismRenderer {
      */
     public static void renderBlock3D(GuiGraphics guiGraphics, Block block, float gridX, float gridY, float gridZ) {
         renderBlock3D(guiGraphics, block.defaultBlockState(), gridX, gridY, gridZ);
+    }
+
+    public static void renderSpace(GuiGraphics guiGraphics, PrismVirtualSpace space) {
+        BlockRenderDispatcher dispatcher = Minecraft.getInstance().getBlockRenderer();
+        RandomSource random = RandomSource.create();
+
+        PoseStack poseStack = guiGraphics.pose();
+
+        Lighting.setupFor3DItems();
+
+        for (BlockPos pos : space.getAllPositions()) {
+            BlockState state = space.getBlockState(pos);
+
+            poseStack.pushPose();
+            poseStack.translate(pos.getX() - 0.5f, pos.getY() - 0.5f, pos.getZ() - 0.5f);
+
+            RenderType type = ItemBlockRenderTypes.getChunkRenderType(state);
+            VertexConsumer consumer = guiGraphics.bufferSource().getBuffer(type);
+
+            // Render the block using our custom "Space" context for connections/tints
+            dispatcher.renderBatched(
+                    state,
+                    pos,
+                    space,
+                    poseStack,
+                    consumer,
+                    true,
+                    random
+            );
+
+            poseStack.popPose();
+        }
+
+        Lighting.setupForFlatItems();
     }
 
     /**
@@ -1012,7 +984,7 @@ public class PrismRenderer {
      * perfectly onto the geometry of the provided {@link BlockState}. This ensures that
      * complex shapes like stairs, slabs, or walls show cracks that follow their actual 3D model.
      * <p>
-     * <b>Requirements:</b> This must be called between {@link #enableCamera} and {@link #disableCamera}.
+     * <b>Requirements:</b> This must be called between {@link PrismCamera} enable and disable functions.
      *
      * @param guiGraphics The current GuiGraphics instance.
      * @param state       The BlockState whose shape the cracks should follow (e.g., {@code Blocks.STONE.defaultBlockState()}).
@@ -1021,7 +993,7 @@ public class PrismRenderer {
      * @param gridX       The relative X-coordinate in the 3D grid.
      * @param gridY       The relative Y-coordinate in the 3D grid.
      * @param gridZ       The relative Z-coordinate in the 3D grid.
-     * @see #enableCamera(GuiGraphics, int, int, float, float, float)
+     * @see PrismCamera
      * @see #renderBlock3D(GuiGraphics, BlockState, float, float, float)
      */
     public static void renderBreakingTexture3D(GuiGraphics guiGraphics, BlockState state, int stage, float gridX, float gridY, float gridZ) {
