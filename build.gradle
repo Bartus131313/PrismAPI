@@ -25,7 +25,6 @@ subprojects {
         tasks.withType(PublishToMavenRepository).configureEach { it.enabled = false }
         tasks.withType(PublishToMavenLocal).configureEach { it.enabled = false }
 
-        // Dodaj to, żeby javadoc w ogóle nie startował dla testmoda
         tasks.withType(Javadoc).configureEach { it.enabled = false }
     }
 
