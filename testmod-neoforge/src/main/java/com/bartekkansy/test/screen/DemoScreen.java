@@ -1,29 +1,25 @@
-package com.bartekkansy.test;
+package com.bartekkansy.test.screen;
 
 import com.bartekkansy.prism.api.client.render.PrismRenderer;
 import com.bartekkansy.prism.api.client.ui.PrismAnimation;
 import com.bartekkansy.prism.api.client.ui.PrismDirection;
 import com.bartekkansy.prism.api.client.ui.PrismLayout;
+import com.bartekkansy.test.util.Utilities;
 import net.minecraft.ChatFormatting;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.ChestBlockEntity;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
 import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
 import java.util.List;
 
-public class TestScreen extends Screen {
+public class DemoScreen extends Screen {
 
     // --- API COMPONENTS ---
     private final PrismLayout centralDashboard = new PrismLayout();
@@ -37,8 +33,8 @@ public class TestScreen extends Screen {
     // --- ASSETS ---
     private static final ResourceLocation FURNACE_GUI = ResourceLocation.fromNamespaceAndPath("minecraft", "textures/gui/container/furnace.png");
 
-    public TestScreen() {
-        super(Component.literal("Prism API Master Dashboard"));
+    public DemoScreen() {
+        super(Component.literal("Prism API - Demo Screen"));
 
         // 1. [LAYOUT] CENTRAL DASHBOARD (Horizontal)
         centralDashboard.setSpacing(20);
@@ -105,7 +101,7 @@ public class TestScreen extends Screen {
         this.renderBackground(guiGraphics, mouseX, mouseY, partialTick);
 
         // --- 2. HEADER ---
-        PrismRenderer.renderGradientStringCenteredX(guiGraphics, font, Component.literal("PRISM FRAMEWORK").withStyle(ChatFormatting.BOLD),
+        PrismRenderer.renderGradientStringCenteredX(guiGraphics, font, Component.literal("Prism API - Demo screen").withStyle(ChatFormatting.BOLD),
                 width / 2, 20, 2.5f, Color.RED, Color.BLUE, true);
 
         // --- 3. DRAW LAYOUTS ---
@@ -158,75 +154,6 @@ public class TestScreen extends Screen {
 
         PrismRenderer.stopScissor(guiGraphics);
 
-        // --- 7. THE REQUESTED WATERMARK (Bottom Left) ---
-        PrismRenderer.renderString(guiGraphics, font, Component.literal("Prism API v1.0.1").withStyle(ChatFormatting.ITALIC),
-                10, height - 15, 0.8f, Color.LIGHT_GRAY, false);
-
-        // Final Watermark details
-        PrismRenderer.renderString(guiGraphics, font, Component.literal("DEVELOPER BUILD - BK"),
-                10, height - 25, 0.5f, Color.GRAY, false);
-
-        // Turn on the 3D Engine at screen coordinates, Scale 2.0x, Isometric View
-        PrismRenderer.enableCamera(guiGraphics, 550, 180, 1.0f, 30f, 225f + 360f * smoothProgress);
-
-        for (int x = -1; x <= 1; x++) {
-            for (int z = -1; z <= 1; z++) {
-                for (int y = 0; y < 3; y++) {
-                    // Layer 0: 3x3 Gold Base
-                    if (y == 0) {
-                        PrismRenderer.renderBlock3D(guiGraphics, Blocks.GOLD_BLOCK, x, y, z);
-                        if (x % 2 != 0 && z % 2 != 0)
-                            PrismRenderer.renderBreakingTexture3D(guiGraphics, Blocks.GOLD_BLOCK.defaultBlockState(), (int)(9 * smoothProgress), x, y, z);
-                    }
-
-                    // Layer 1: Center Core
-                    else if (x == 0 && y == 1 && z == 0) {
-                        PrismRenderer.renderBlock3D(guiGraphics, Blocks.NETHERRACK, x, y, z);
-                    }
-
-                    // Layer 1: The "Cross" of Redstone Torches
-                    // Condition: (Abs X + Abs Z == 1) ensures it's North, South, East, or West of center
-                    else if (y == 1 && (Math.abs(x) + Math.abs(z) == 1)) {
-                        PrismRenderer.renderBlock3D(guiGraphics, Blocks.REDSTONE_TORCH, x, y, z);
-                    }
-
-                    // Layer 2: Fire on top of the Core
-                    else if (x == 0 && y == 2 && z == 0) {
-                        PrismRenderer.renderBlock3D(guiGraphics, Blocks.FIRE, x, y, z);
-                    }
-                }
-            }
-        }
-
-        // Turn off the engine and flush the renders
-        PrismRenderer.disableCamera(guiGraphics);
-
-        // Draw normal 2D GUI stuff over it
-        PrismRenderer.renderGradientStringCenteredXY(guiGraphics, font, Component.literal("Herobrine Altar"), 550, 220, 1f, Color.GREEN, Color.BLUE, false);
-
-        PrismRenderer.enableCamera(guiGraphics, 150, 170, 1.5f, 30f, 225f);
-
-        PrismRenderer.renderPiston3D(guiGraphics, Direction.UP, smoothProgress, 0, 0, 0);
-
-        PrismRenderer.renderCustom3D(guiGraphics, 1, 0, 0, (graphics, poseStack, bufferSource, pt) -> {
-            Minecraft mc = Minecraft.getInstance();
-
-            // Ensure the dummy chest knows about the world (needed for textures)
-            if (DUMMY_CHEST.getLevel() == null) DUMMY_CHEST.setLevel(mc.level);
-
-            // Get the vanilla Chest Renderer
-            var renderer = mc.getBlockEntityRenderDispatcher().getRenderer(DUMMY_CHEST);
-
-            if (renderer != null) {
-                // We can actually use the 'partialTick' parameter of the hook
-                // OR pass our custom openProgress directly if the renderer supports it.
-                // Most Chest renderers use the internal 'lidness' of the entity:
-                // DUMMY_CHEST.openness = openProgress;
-
-                renderer.render(DUMMY_CHEST, pt, poseStack, bufferSource, 15728880, OverlayTexture.NO_OVERLAY);
-            }
-        });
-
-        PrismRenderer.disableCamera(guiGraphics);
+        Utilities.renderWatermark(guiGraphics, width, height);
     }
 }
