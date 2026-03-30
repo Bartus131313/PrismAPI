@@ -1,5 +1,6 @@
 package com.bartekkansy.prism;
 
+import com.bartekkansy.prism.api.util.PrismConfig;
 import net.minecraft.ChatFormatting;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,7 +11,7 @@ public final class Prism {
 
     public static void init() {
         // Get the version automatically from the Mod Container
-        String version = getVersion();
+        String version = PrismConfig.getVersion();
 
         // Determine if it's a Dev build (checks for "SNAPSHOT", "dev", or "beta")
         boolean isDev = version.contains("SNAPSHOT") || version.contains("dev") || version.contains("beta");
@@ -30,9 +31,5 @@ public final class Prism {
         LOGGER.warn("{}> This build is unstable and intended for testing.{}", yellow, reset);
         LOGGER.warn("{}> Stable builds: https://github.com/Bartus131313/PrismAPI{}", yellow, reset);
         LOGGER.warn("{}-----------------------------------------{}", yellow, reset);
-    }
-
-    private static String getVersion() {
-        return "1.1.0-SNAPSHOT";
     }
 }
