@@ -41,7 +41,7 @@ Prism is a high-performance, developer-friendly UI and rendering library designe
 | `v1.1.0` | Architect    | 3D-on-2D Pipeline, Piston logic, and NBT structures. | [View Log](docs/changelogs/1.1.0.MD) |
 
 ## 🔨 Demo of the example usage (`The Architect`)
-![Demo of Prism API](docs/images/demo-v1.0.0-SNAPSHOT.gif)
+![Demo of Prism API](docs/images/demo-v1.1.0-SNAPSHOT.gif)
 
 ## 🚀 Quick Start
 1. **Smooth Rendering**
