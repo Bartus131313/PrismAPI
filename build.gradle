@@ -22,9 +22,11 @@ subprojects {
     def silentModules = ['common', 'testmod-neoforge']
 
     if (silentModules.contains(project.name)) {
-        // This disables the publishing tasks for these specific modules
         tasks.withType(PublishToMavenRepository).configureEach { it.enabled = false }
         tasks.withType(PublishToMavenLocal).configureEach { it.enabled = false }
+
+        // Dodaj to, żeby javadoc w ogóle nie startował dla testmoda
+        tasks.withType(Javadoc).configureEach { it.enabled = false }
     }
 
     base {
@@ -72,6 +74,13 @@ subprojects {
             mavenJava(MavenPublication) {
                 artifactId = base.archivesName.get()
                 from components.java
+
+                artifact(tasks.sourcesJar) {
+                    classifier = "sources"
+                }
+                artifact(tasks.javadocJar) {
+                    classifier = "javadoc"
+                }
             }
         }
 
@@ -85,6 +94,12 @@ subprojects {
                     password = System.getenv("GITHUB_TOKEN")
                 }
             }
+        }
+    }
+
+    if (silentModules.contains(project.name)) {
+        publishing {
+            publications.clear()
         }
     }
 }
