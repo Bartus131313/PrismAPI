@@ -85,7 +85,7 @@ layout.drawHorizontal(guiGraphics, centerX, centerY, mouseX, mouseY);
 ## 📦 Installation
 Add the following to your build.gradle:
 ```groovy
-def prism_version = "v1.0.0" // Replace with the version you want (e.g., v1.0.0 or main-SNAPSHOT)
+def prism_version = "v1.0.0" // Replace with the version you want (e.g., v1.0.0 or master-SNAPSHOT)
 
 repositories {
     maven { url "https://jitpack.io" }
