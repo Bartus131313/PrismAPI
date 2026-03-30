@@ -22,9 +22,10 @@ subprojects {
     def silentModules = ['common', 'testmod-neoforge']
 
     if (silentModules.contains(project.name)) {
-        // This disables the publishing tasks for these specific modules
         tasks.withType(PublishToMavenRepository).configureEach { it.enabled = false }
         tasks.withType(PublishToMavenLocal).configureEach { it.enabled = false }
+
+        tasks.withType(Javadoc).configureEach { it.enabled = false }
     }
 
     base {
@@ -61,8 +62,27 @@ subprojects {
     }
 
     tasks.withType(Javadoc).configureEach {
+        source(sourceSets.main.allJava)
+
+        if (project.name != 'common') {
+            source(project(":common").sourceSets.main.allJava)
+            classpath += project(":common").sourceSets.main.compileClasspath
+        }
+
+        classpath += sourceSets.main.compileClasspath
+
         options.encoding = 'UTF-8'
         options.addStringOption('Xdoclint:none', '-quiet')
+    }
+
+    tasks.named('sourcesJar', Jar) {
+        duplicatesStrategy = DuplicatesStrategy.INCLUDE
+
+        from sourceSets.main.allJava
+
+        if (project.name != 'common') {
+            from project(":common").sourceSets.main.allJava
+        }
     }
 
     // Configure Maven publishing.
@@ -84,6 +104,12 @@ subprojects {
                     password = System.getenv("GITHUB_TOKEN")
                 }
             }
+        }
+    }
+
+    afterEvaluate {
+        if (silentModules.contains(project.name)) {
+            publishing.publications.clear()
         }
     }
 }
