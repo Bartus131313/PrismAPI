@@ -6,20 +6,22 @@
 ![NeoForge](https://img.shields.io/badge/Loader-NeoForge-orange)
 ![Fabric](https://img.shields.io/badge/Loader-Fabric-yellow)
 
+![Status](https://img.shields.io/badge/Status-Development-yellow)
+
 ***
 
 ## ⚠️ WORK IN PROGRESS
 This branch contains experimental 3D rendering features for `v1.1.0`.
 For stable builds, use the [master branch](https://github.com/Bartus131313/PrismAPI/tree/master).
 
-However if you would like to test this version in *Early Access* you can do it changing the version in `build.gradle` and following the **Installation Guide** below.
+However if you would like to test this version in *Early Access* you can do it by changing the version in `build.gradle` and following the **Installation Guide** below.
 ```groovy
 def prism_version = "dev~1.1.0-SNAPSHOT"
 ```
 
 ***
 
-# 💎 Prism API [![Status](https://img.shields.io/badge/Status-Development-yellow)](https://github.com/Bartus131313/PrismAPI/tree/dev/1.1.0)
+# 💎 Prism API
 
 ### **The Ultimate Rendering Framework for Minecraft NeoForge/Fabric.**
 Prism is a high-performance, developer-friendly UI and rendering library designed to bridge the gap between "standard modded UIs" and "professional dashboard experiences." It provides a suite of tools for handling complex layouts, fluid dynamics, and butter-smooth animations with minimal boilerplate.
