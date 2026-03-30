@@ -1,6 +1,10 @@
 ![Release](https://jitpack.io/v/Bartus131313/PrismAPI.svg)
-![Last Commit](https://img.shields.io/github/last-commit/Bartus131313/PrismAPI?color=blue)
-![License](https://img.shields.io/github/license/Bartus131313/PrismAPI?color=green)
+![Last Commit](https://img.shields.io/github/last-commit/Bartus131313/PrismAPI?color=purple)
+![License](https://img.shields.io/github/license/Bartus131313/PrismAPI)
+
+![Minecraft](https://img.shields.io/badge/Minecraft-1.21.1-red)
+![NeoForge](https://img.shields.io/badge/Loader-NeoForge-orange)
+![Fabric](https://img.shields.io/badge/Loader-Fabric-yellow)
 
 # 💎 Prism API
 
@@ -15,14 +19,14 @@ Prism is a high-performance, developer-friendly UI and rendering library designe
 - 📐 **Adaptive Layouts**: Flex-box inspired PrismLayout system for automatic horizontal and vertical element positioning.
 - ✂️ **Precision Clipping**: Easy-to-use Scissor API for marquees, scrolling lists, and contained UI elements.
 
-## 📒 Change logs
-| Version                       | Description                              |
-|-------------------------------|------------------------------------------|
-| [v1.0.0](changelogs/1.0.0.MD) | The first official release of Prism API. |
-| [v1.0.1](changelogs/1.0.1.MD) | Various 3D rendering functions.          |
+## 📒 Version History
+| Version  | Name         | Primary Focus                                        | Full Details                    | 
+|----------|--------------|------------------------------------------------------|---------------------------------|
+| `v1.0.0` | Foundational | Core 2D UI components, fluids, and layouts.          | [View Log](docs/changelogs/1.0.0.MD) |
+| `v1.1.0` | Architect    | 3D-on-2D Pipeline, Piston logic, and NBT structures. | [View Log](docs/changelogs/1.1.0.MD) |
 
-## 🔨 Demo of the latest version
-![Demo of Prism API](images/demo-v1.0.1.gif)
+## 🔨 Demo of the example usage (`The Architect`)
+![Demo of Prism API](docs/images/demo-v1.0.1.gif)
 
 ## 🚀 Quick Start
 1. **Smooth Rendering**
