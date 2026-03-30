@@ -93,10 +93,10 @@ repositories {
 
 dependencies {
     // --- For NeoForge Projects ---
-    modImplementation "com.github.Bartus131313.PrismAPI:prism-api-neoforge:${prism_version}"
+    implementation "com.github.Bartus131313.PrismAPI:prism-api-neoforge:${prism_version}"
 
     // --- For Fabric Projects ---
-    modImplementation "com.github.Bartus131313.PrismAPI:prism-api-fabric:${prism_version}"
+    implementation "com.github.Bartus131313.PrismAPI:prism-api-fabric:${prism_version}"
 }
 ```
 
