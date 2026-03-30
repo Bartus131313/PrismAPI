@@ -75,11 +75,8 @@ subprojects {
                 artifactId = base.archivesName.get()
                 from components.java
 
-                artifact(tasks.sourcesJar) {
-                    classifier = "sources"
-                }
-                artifact(tasks.javadocJar) {
-                    classifier = "javadoc"
+                if (tasks.findByName("javadocJar")) {
+                    artifact(tasks.javadocJar)
                 }
             }
         }
@@ -97,9 +94,9 @@ subprojects {
         }
     }
 
-    if (silentModules.contains(project.name)) {
-        publishing {
-            publications.clear()
+    afterEvaluate {
+        if (silentModules.contains(project.name)) {
+            publishing.publications.clear()
         }
     }
 }
