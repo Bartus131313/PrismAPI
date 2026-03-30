@@ -6,14 +6,27 @@
 ![NeoForge](https://img.shields.io/badge/Loader-NeoForge-orange)
 ![Fabric](https://img.shields.io/badge/Loader-Fabric-yellow)
 
-# 💎 Prism API
+***
+
+## ⚠️ WORK IN PROGRESS
+This branch contains experimental 3D rendering features for `v1.1.0`.
+For stable builds, use the [master branch](https://github.com/Bartus131313/PrismAPI/tree/master).
+
+However if you would like to test this version in *Early Access* you can do it changing the version in `build.gradle` and following the **Installation Guide** below.
+```groovy
+def prism_version = "dev~1.1.0-SNAPSHOT"
+```
+
+***
+
+# 💎 Prism API [![Status](https://img.shields.io/badge/Status-Development-yellow)](https://github.com/Bartus131313/PrismAPI/tree/dev/1.1.0)
 
 ### **The Ultimate Rendering Framework for Minecraft NeoForge/Fabric.**
 Prism is a high-performance, developer-friendly UI and rendering library designed to bridge the gap between "standard modded UIs" and "professional dashboard experiences." It provides a suite of tools for handling complex layouts, fluid dynamics, and butter-smooth animations with minimal boilerplate.
 
 ## ✨ Features
-- ⚡ **Hybrid Rendering**: Combines immediate-mode convenience with retained-mode efficiency.
-- 🌊 **Advanced Fluid Tanks**: Built-in support for animated fluid rendering with custom tiling, UV clipping, and dynamic tooltips.
+- ⚡ **Hybrid Rendering**: Combines ~~immediate-mode convenience with retained-mode efficiency.
+- 🌊 **Advanced Fluid Tanks**: Built-in support for animated fluid rendering with custom~~ tiling, UV clipping, and dynamic tooltips.
 - 📈 **Smooth Motion Engine**: A full suite of 30+ easing functions (Sine, Elastic, Bounce, etc.) with Delta-Time independent smoothing.
 - 🌈 **Gradient Typography**: Per-character color interpolation supporting Component color multiplication (tinting).
 - 📐 **Adaptive Layouts**: Flex-box inspired PrismLayout system for automatic horizontal and vertical element positioning.
