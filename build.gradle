@@ -90,7 +90,20 @@ subprojects {
         publications {
             mavenJava(MavenPublication) {
                 artifactId = base.archivesName.get()
-                from components.java
+                // from components.java
+
+                // 1. Główny zremapowany JAR (ten z kodem)
+                artifact(tasks.named('remapJar'))
+
+                // 2. Źródła (jawnie wskazujemy, że to 'sources')
+                artifact(tasks.named('remapSourcesJar')) {
+                    classifier = "sources"
+                }
+
+                // 3. Javadoc (jawnie wskazujemy, że to 'javadoc')
+                artifact(tasks.named('javadocJar')) {
+                    classifier = "javadoc"
+                }
             }
         }
 
