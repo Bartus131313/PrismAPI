@@ -128,14 +128,14 @@ public class PrismRenderer {
                                        int width, int height) {
         if (amount <= 0 || fluid == Fluids.EMPTY) return;
 
-        // Calculate the scaling (How high is the fluid?)
+        // Calculate the scaling
         float capacityRatio = (float) amount / maxAmount;
         int fluidHeight = (int) (height * capacityRatio);
 
-        // Adjust Y so it draws from the BOTTOM of the tank up
+        // Adjust Y so it draws from the bottom of the tank up
         int fluidY = y + (height - fluidHeight);
 
-        // Call your existing high-performance renderer
+        // Call existing fluid rendering function cuz why not
         renderFluidTexture(guiGraphics, fluid, x, fluidY, width, fluidHeight);
     }
 
@@ -161,13 +161,14 @@ public class PrismRenderer {
     public static void renderFluidTankWithTooltip(GuiGraphics guiGraphics, Fluid fluid, int amount, int maxAmount,
                                                   int x, int y, int width, int height, int mouseX, int mouseY,
                                                   Function<FluidTankInfo, List<Component>> tooltipProvider) {
-        // Always draw the fluid first
+        // Draw the fluid tank first
         renderFluidTank(guiGraphics, fluid, amount, maxAmount, x, y, width, height);
 
         // Get the custom list of components
         FluidTankInfo info = new FluidTankInfo(fluid, amount, maxAmount);
         List<Component> customTooltip = tooltipProvider.apply(info);
 
+        // And render container tooltip with existing function
         renderContainerTooltip(guiGraphics, x, y, width, height, mouseX, mouseY, customTooltip);
     }
 
@@ -177,7 +178,7 @@ public class PrismRenderer {
      * This is a convenience method for common use cases where custom formatting
      * is not required.
      * </p>
-
+     *
      * @param guiGraphics The current {@link GuiGraphics} instance.
      * @param fluid       The {@link Fluid} to render.
      * @param amount      Current volume.
@@ -193,14 +194,16 @@ public class PrismRenderer {
     public static void renderFluidTankWithTooltip(GuiGraphics guiGraphics, Fluid fluid, int amount, int maxAmount,
                                                   int x, int y, int width, int height, int mouseX, int mouseY) {
 
+        // Call function to render the fluid tank with tooltip
         PrismRenderer.renderFluidTankWithTooltip(guiGraphics, fluid, amount, maxAmount, x, y, width, height, mouseX, mouseY, (info) -> {
             List<Component> lines = new ArrayList<>();
 
-            // Create the tooltip text (e.g., "Lava: 500 / 1000 mB")
+            // Create the default tooltip text
             lines.add(Component.empty().append(info.getDisplayName())
                     .append(Component.literal(": " + PrismNumberFormatter.format(amount) + " / " + PrismNumberFormatter.format(maxAmount) + " mB"))
                     .withStyle(ChatFormatting.GRAY));
 
+            // Return lines as List
             return lines;
         });
     }
@@ -224,7 +227,9 @@ public class PrismRenderer {
      * @apiNote Use this for complex tooltips that require multiple colors or descriptions.
      */
     public static void renderContainerTooltip(GuiGraphics guiGraphics, int x, int y, int width, int height, int mouseX, int mouseY, List<Component> tooltip) {
+        // Check if mouse is inside the box
         if (mouseX >= x && mouseX < x + width && mouseY >= y && mouseY < y + height) {
+            // Render default Minecraft tooltip
             guiGraphics.renderComponentTooltip(Minecraft.getInstance().font, tooltip, mouseX, mouseY);
         }
     }
@@ -264,10 +269,12 @@ public class PrismRenderer {
         if (fillAmount <= 0.0f) return;
         fillAmount = Math.min(fillAmount, 1.0f);
 
+        // Get bottom and top coords
         int fillHeight = (int) (height * fillAmount);
         int top = y + (height - fillHeight);
-        int bottom = y + height; // Absolute bottom coordinate
+        int bottom = y + height;
 
+        // Fill with gradient
         guiGraphics.fillGradient(x, top, x + width, bottom, colorStart, colorEnd);
     }
 
@@ -311,9 +318,11 @@ public class PrismRenderer {
         if (fillAmount <= 0.0f) return;
         fillAmount = Math.min(fillAmount, 1.0f);
 
+        // Get right coords
         int fillWidth = (int) (width * fillAmount);
-        int right = x + fillWidth; // Absolute right coordinate
+        int right = x + fillWidth;
 
+        // Fill with gradient
         guiGraphics.fillGradient(x, y, right, y + height, colorStart, colorEnd);
     }
 
@@ -361,10 +370,11 @@ public class PrismRenderer {
 
         int fillHeight = (int) (height * fillAmount);
 
-        // Calculate the start point of the "filled" part
+        // Calculate the start point of the filled part
         int screenY = y + (height - fillHeight);
         int textureV = v + (height - fillHeight);
 
+        // Blit the texture on the screen
         guiGraphics.blit(texture, x, screenY, u, textureV, width, fillHeight);
     }
 
@@ -391,8 +401,10 @@ public class PrismRenderer {
         if (fillAmount <= 0.0f) return;
         fillAmount = Math.min(fillAmount, 1.0f);
 
+        // Calculate fill amount
         int fillWidth = (int) (width * fillAmount);
 
+        // Blit on the screen
         guiGraphics.blit(texture, x, y, u, v, fillWidth, height);
     }
 
@@ -609,8 +621,6 @@ public class PrismRenderer {
      * @param height The height of the visible window.
      */
     public static void startScissor(GuiGraphics guiGraphics, int x, int y, int width, int height) {
-        // Minecraft's enableScissor uses absolute screen coordinates.
-        // It's best to use the built-in GuiGraphics helper which handles scaling.
         guiGraphics.enableScissor(x, y, x + width, y + height);
     }
 
@@ -640,14 +650,17 @@ public class PrismRenderer {
         guiGraphics.pose().translate(x, y, 0);
         guiGraphics.pose().scale(scale, scale, 1.0f);
 
+        // Get total width of the text
         float totalWidth = font.width(text);
-        final float[] currentX = {0}; // Array used to allow modification inside lambda
+        final float[] currentX = {0};
 
-        // Start/End color extraction
+        // Get correct colors as int
         int r0 = (colorStart >> 16) & 0xFF, g0 = (colorStart >> 8) & 0xFF, b0 = colorStart & 0xFF, a0 = (colorStart >> 24) & 0xFF;
         int r1 = (colorEnd >> 16) & 0xFF, g1 = (colorEnd >> 8) & 0xFF, b1 = colorEnd & 0xFF, a1 = (colorEnd >> 24) & 0xFF;
 
+        // Render each char separately
         text.getVisualOrderText().accept((index, style, codePoint) -> {
+            // Get current char
             String ch = new String(Character.toChars(codePoint));
             float delta = currentX[0] / Math.max(1, totalWidth);
 
@@ -657,7 +670,7 @@ public class PrismRenderer {
             int gb = (int) PrismAnimation.lerp(b0, b1, delta);
             int ga = (int) PrismAnimation.lerp(a0, a1, delta);
 
-            // Component Tint (White = 1.0)
+            // Component Tint
             int cCol = style.getColor() != null ? style.getColor().getValue() : 0xFFFFFF;
 
             // Multiply channels
@@ -665,11 +678,15 @@ public class PrismRenderer {
             int fg = (gg * ((cCol >> 8) & 0xFF)) / 255;
             int fb = (gb * (cCol & 0xFF)) / 255;
 
+            // Draw string
             guiGraphics.drawString(font, ch, (int)currentX[0], 0, (ga << 24) | (fr << 16) | (fg << 8) | fb, shadow);
+
+            // Add X pos to current pos
             currentX[0] += font.width(FormattedCharSequence.forward(ch, style));
             return true;
         });
 
+        // Pop Pose after rendering
         guiGraphics.pose().popPose();
     }
 

@@ -45,7 +45,7 @@ public class PrismLayout {
 
     /**
      * Adds an element to the layout queue.
-     * * @param width    The width this element will occupy.
+     * @param width    The width this element will occupy.
      * @param height   The height this element will occupy.
      * @param renderer A lambda calling a {@code void} render method (e.g. PrismRenderer).
      */

@@ -11,7 +11,6 @@ import net.minecraft.world.level.material.Fluid;
 public class PrismFluidHelperFabric implements IPrismFluidHelper {
     @Override
     public TextureAtlasSprite getStillSprite(Fluid fluid) {
-        // Fabric uses FluidVariant for rendering info
         return FluidVariantRendering.getSprite(FluidVariant.of(fluid));
     }
 
@@ -22,7 +21,6 @@ public class PrismFluidHelperFabric implements IPrismFluidHelper {
 
     @Override
     public Component getDisplayName(Fluid fluid) {
-        // Fabric API provides a dedicated utility for this
         return FluidVariantAttributes.getName(FluidVariant.of(fluid));
     }
 }

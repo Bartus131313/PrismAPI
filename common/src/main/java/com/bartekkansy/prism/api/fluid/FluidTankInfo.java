@@ -42,7 +42,6 @@ public record FluidTankInfo(Fluid fluid, int amount, int capacity) {
      * @return A {@link Component} containing the translated fluid name.
      */
     public Component getDisplayName() {
-        // Platform-specific helper handles the display name
         return PrismPlatform.getFluidHelper().getDisplayName(this.fluid);
     }
 }

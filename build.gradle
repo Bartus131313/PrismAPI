@@ -18,7 +18,7 @@ subprojects {
     apply plugin: 'architectury-plugin'
     apply plugin: 'maven-publish'
 
-    // List the names of the modules you want to SKIP
+    // List the names of the modules to skip
     def silentModules = ['common', 'testmod-neoforge']
 
     if (silentModules.contains(project.name)) {
@@ -85,12 +85,20 @@ subprojects {
         }
     }
 
-    // Configure Maven publishing.
+    // Configure Maven publishing
     publishing {
         publications {
             mavenJava(MavenPublication) {
                 artifactId = base.archivesName.get()
-                from components.java
+                artifact(tasks.named('remapJar'))
+
+                artifact(tasks.named('remapSourcesJar')) {
+                    classifier = "sources"
+                }
+
+                artifact(tasks.named('javadocJar')) {
+                    classifier = "javadoc"
+                }
             }
         }
 
@@ -99,7 +107,6 @@ subprojects {
                 name = "GitHubPackages"
                 url = "https://maven.pkg.github.com/${System.getenv("GITHUB_REPOSITORY")}"
                 credentials {
-                    // This looks for the variables provided by the GitHub Action
                     username = System.getenv("GITHUB_ACTOR")
                     password = System.getenv("GITHUB_TOKEN")
                 }

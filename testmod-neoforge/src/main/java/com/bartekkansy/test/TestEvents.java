@@ -9,7 +9,6 @@ public class TestEvents {
 
     @SubscribeEvent
     public static void onRegisterCommands(RegisterCommandsEvent event) {
-        // This will only run when the test source set is loaded (dev environment)
         TestCommand.register(event.getDispatcher());
     }
 }

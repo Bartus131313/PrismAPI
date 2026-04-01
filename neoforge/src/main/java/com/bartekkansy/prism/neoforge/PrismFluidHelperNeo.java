@@ -23,7 +23,6 @@ public class PrismFluidHelperNeo implements IPrismFluidHelper {
 
     @Override
     public Component getDisplayName(Fluid fluid) {
-        // NeoForge uses FluidType for the "Real" name
         return fluid.getFluidType().getDescription();
     }
 }
