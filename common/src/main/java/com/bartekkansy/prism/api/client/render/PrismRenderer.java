@@ -2,7 +2,7 @@ package com.bartekkansy.prism.api.client.render;
 
 import com.bartekkansy.prism.api.client.render.world.PrismCamera;
 import com.bartekkansy.prism.api.client.render.world.PrismVirtualSpace;
-import com.bartekkansy.prism.api.client.ui.PrismAnimation;
+import com.bartekkansy.prism.api.client.ui.animation.PrismAnimator;
 import com.bartekkansy.prism.api.client.ui.PrismDirection;
 import com.bartekkansy.prism.api.fluid.FluidTankInfo;
 import com.bartekkansy.prism.api.fluid.IPrismFluidHelper;
@@ -669,10 +669,10 @@ public class PrismRenderer {
             float delta = currentX[0] / Math.max(1, totalWidth);
 
             // Interpolate Gradient
-            int gr = (int) PrismAnimation.lerp(r0, r1, delta);
-            int gg = (int) PrismAnimation.lerp(g0, g1, delta);
-            int gb = (int) PrismAnimation.lerp(b0, b1, delta);
-            int ga = (int) PrismAnimation.lerp(a0, a1, delta);
+            int gr = (int) PrismAnimator.lerp(r0, r1, delta);
+            int gg = (int) PrismAnimator.lerp(g0, g1, delta);
+            int gb = (int) PrismAnimator.lerp(b0, b1, delta);
+            int ga = (int) PrismAnimator.lerp(a0, a1, delta);
 
             // Component Tint
             int cCol = style.getColor() != null ? style.getColor().getValue() : 0xFFFFFF;

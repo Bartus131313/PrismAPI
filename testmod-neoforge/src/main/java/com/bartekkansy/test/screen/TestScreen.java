@@ -3,7 +3,8 @@ package com.bartekkansy.test.screen;
 import com.bartekkansy.prism.api.client.render.world.PrismCamera;
 import com.bartekkansy.prism.api.client.render.PrismRenderer;
 import com.bartekkansy.prism.api.client.render.world.PrismVirtualSpace;
-import com.bartekkansy.prism.api.client.ui.PrismAnimation;
+import com.bartekkansy.prism.api.client.ui.animation.PrismAnimation;
+import com.bartekkansy.prism.api.client.ui.animation.PrismAnimator;
 import com.bartekkansy.test.util.Utilities;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -64,6 +65,8 @@ public class TestScreen extends Screen {
         mySpace.putBlock(new BlockPos(-1, 1, -1), Blocks.LANTERN.defaultBlockState().setValue(net.minecraft.world.level.block.LanternBlock.HANGING, false));
     }
 
+    private final PrismAnimation testAnim = new PrismAnimation(1f, PrismAnimator::easeInOutCubic);
+
     @Override
     public void render(@NotNull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
         // Get current time in ms
@@ -71,7 +74,7 @@ public class TestScreen extends Screen {
 
         // Get cool animation progress
         this.targetProgress = (now % 6000 < 3000) ? (float) (now % 3000) / 3000 : 1f - (float) (now % 3000) / 3000;
-        this.smoothProgress = PrismAnimation.easeInOutCubic(this.targetProgress);
+        this.smoothProgress = PrismAnimator.easeInOutCubic(this.targetProgress);
 
         // Redner background - blur
         this.renderBackground(guiGraphics, mouseX, mouseY, partialTick);
@@ -151,6 +154,11 @@ public class TestScreen extends Screen {
         PrismRenderer.renderSpace(guiGraphics, mySpace);
 
         renderCamera.disable(guiGraphics);
+
+        testAnim.render(guiGraphics, animationInfo -> {
+            PrismRenderer.renderStringCenteredXY(animationInfo.guiGraphics(), font, Component.literal("TEST"), width / 2, height - 50,
+                    animationInfo.progress() + 1f, Color.BLUE, true);
+        });
 
         // Render watermark at the end
         Utilities.renderWatermark(guiGraphics, width, height);

@@ -55,15 +55,15 @@ def prism_version = "dev~1.1.0-SNAPSHOT"
 dependencies {
     neoForge "net.neoforged:neoforge:${rootProject.neoforge_version}"
 
-    modImplementation "com.github.Bartus131313.PrismAPI:prism-api-neoforge:${prism_version}"
+    // modImplementation "com.github.Bartus131313.PrismAPI:prism-api-neoforge:${prism_version}"
     // implementation "com.bartekkansy:prism-api-neoforge:${prism_version}"
 
     // Use 'implementation' for the common project
-    // implementation project(":common")
+    implementation project(":common")
 
     // Use 'implementation' for the neoforge project
     // This tells Loom to include the neoforge/src/main/resources/META-INF folder
-    // implementation project(":neoforge")
+    implementation project(":neoforge")
 }
 
 processResources {

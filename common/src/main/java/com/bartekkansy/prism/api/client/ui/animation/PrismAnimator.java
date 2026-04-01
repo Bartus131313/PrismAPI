@@ -1,11 +1,11 @@
-package com.bartekkansy.prism.api.client.ui;
+package com.bartekkansy.prism.api.client.ui.animation;
 
 /**
  * A comprehensive utility for smooth UI animations and transitions.
  * Includes standard linear interpolation and a variety of easing functions
  * to create organic, professional-feeling motion.
  */
-public class PrismAnimation {
+public class PrismAnimator {
 
     /**
      * Linearly interpolates between two values based on a delta.

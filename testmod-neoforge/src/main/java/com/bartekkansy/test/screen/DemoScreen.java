@@ -1,7 +1,7 @@
 package com.bartekkansy.test.screen;
 
 import com.bartekkansy.prism.api.client.render.PrismRenderer;
-import com.bartekkansy.prism.api.client.ui.PrismAnimation;
+import com.bartekkansy.prism.api.client.ui.animation.PrismAnimator;
 import com.bartekkansy.prism.api.client.ui.PrismDirection;
 import com.bartekkansy.prism.api.client.ui.PrismLayout;
 import com.bartekkansy.test.util.Utilities;
@@ -40,7 +40,7 @@ public class DemoScreen extends Screen {
 
         // Feature: Fluid Tank with Custom Data Provider
         centralDashboard.addElement(34, 100, (info) -> {
-            float level = PrismAnimation.easeInOutQuart(smoothProgress);
+            float level = PrismAnimator.easeInOutQuart(smoothProgress);
             PrismRenderer.renderFluidTankWithTooltip(info.guiGraphics(), Fluids.LAVA, (int)(2000 * level), 2000,
                     info.x(), info.y(), info.width(), info.height(), info.mouseX(), info.mouseY(),
                     (tank) -> List.of(
@@ -61,7 +61,7 @@ public class DemoScreen extends Screen {
             Color color = smoothProgress > 0.8f ? Color.RED : (smoothProgress < 0.2f ? Color.GRAY : Color.GREEN);
 
             // Using easeOutBack for a "popping" text effect
-            float textScale = 1.0f + (PrismAnimation.easeInOutQuart(smoothProgress) * 0.5f);
+            float textScale = 1.0f + (PrismAnimator.easeInOutQuart(smoothProgress) * 0.5f);
             PrismRenderer.renderStringCenteredXY(info.guiGraphics(), font, Component.literal(status),
                     info.x() + (info.width()/2), info.y() + 50, textScale, color, true);
         });
@@ -92,7 +92,7 @@ public class DemoScreen extends Screen {
 
         // Get cool animation progress
         this.targetProgress = (now % 6000 < 3000) ? (float) (now % 3000) / 3000 : 1f - (float) (now % 3000) / 3000;
-        this.smoothProgress = PrismAnimation.easeInOutCubic(this.targetProgress);
+        this.smoothProgress = PrismAnimator.easeInOutCubic(this.targetProgress);
 
         this.renderBackground(guiGraphics, mouseX, mouseY, partialTick);
 
