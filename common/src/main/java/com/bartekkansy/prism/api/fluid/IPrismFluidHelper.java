@@ -16,7 +16,7 @@ import net.minecraft.world.level.material.Fluid;
 public interface IPrismFluidHelper {
     /**
      * Retrieves the "Still" texture sprite for the given fluid.
-     * * @param fluid The {@link Fluid} to query.
+     * @param fluid The {@link Fluid} to query.
      * @return The {@link TextureAtlasSprite} used for the fluid when it is not flowing.
      * @apiNote Implementation should typically use {@code FluidVariantAttributes} on Fabric
      * or {@code IClientFluidTypeExtensions} on NeoForge.

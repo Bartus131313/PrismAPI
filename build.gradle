@@ -18,7 +18,7 @@ subprojects {
     apply plugin: 'architectury-plugin'
     apply plugin: 'maven-publish'
 
-    // List the names of the modules you want to SKIP
+    // List the names of the modules to skip
     def silentModules = ['common', 'testmod-neoforge']
 
     if (silentModules.contains(project.name)) {
@@ -85,13 +85,11 @@ subprojects {
         }
     }
 
-    // Configure Maven publishing.
+    // Configure Maven publishing
     publishing {
         publications {
             mavenJava(MavenPublication) {
                 artifactId = base.archivesName.get()
-                // from components.java
-
                 artifact(tasks.named('remapJar'))
 
                 artifact(tasks.named('remapSourcesJar')) {

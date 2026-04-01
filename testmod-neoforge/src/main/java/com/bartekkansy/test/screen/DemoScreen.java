@@ -21,22 +21,21 @@ import java.util.List;
 
 public class DemoScreen extends Screen {
 
-    // --- API COMPONENTS ---
+    // Layouts
     private final PrismLayout centralDashboard = new PrismLayout();
     private final PrismLayout sidebarNodes = new PrismLayout();
 
-    // --- ANIMATION STATE ---
+    // Animation state
     private float smoothProgress = 0.0f;
     private float targetProgress = 0.0f;
     private long lastMs = System.currentTimeMillis();
 
-    // --- ASSETS ---
+    // Assets
     private static final ResourceLocation FURNACE_GUI = ResourceLocation.fromNamespaceAndPath("minecraft", "textures/gui/container/furnace.png");
 
     public DemoScreen() {
         super(Component.literal("Prism API - Demo Screen"));
 
-        // 1. [LAYOUT] CENTRAL DASHBOARD (Horizontal)
         centralDashboard.setSpacing(20);
 
         // Feature: Fluid Tank with Custom Data Provider
@@ -67,7 +66,7 @@ public class DemoScreen extends Screen {
                     info.x() + (info.width()/2), info.y() + 50, textScale, color, true);
         });
 
-        // 2. [LAYOUT] SIDEBAR NODES (Vertical)
+        // Sidebar nodes
         sidebarNodes.setSpacing(10);
         for(int i = 1; i <= 3; i++) {
             final int id = i;
@@ -86,48 +85,45 @@ public class DemoScreen extends Screen {
 
     @Override
     public void render(@NotNull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-        // --- 1. ANIMATION LOGIC ---
+        // Get current time and calculate delta time
         long now = System.currentTimeMillis();
         float deltaTime = (now - lastMs) / 1000f;
         lastMs = now;
 
-        // Toggle target every 3 seconds for demo purposes
-        // this.targetProgress = (now % 6000 < 3000) ? 1.0f : 0.0f;
+        // Get cool animation progress
         this.targetProgress = (now % 6000 < 3000) ? (float) (now % 3000) / 3000 : 1f - (float) (now % 3000) / 3000;
         this.smoothProgress = PrismAnimation.easeInOutCubic(this.targetProgress);
-        // Smoothly interpolate the progress value
-        // this.smoothProgress = PrismAnimation.lerp(smoothProgress, targetProgress, deltaTime * 3.5f);
 
         this.renderBackground(guiGraphics, mouseX, mouseY, partialTick);
 
-        // --- 2. HEADER ---
+        // Header
         PrismRenderer.renderGradientStringCenteredX(guiGraphics, font, Component.literal("Prism API - Demo screen").withStyle(ChatFormatting.BOLD),
                 width / 2, 20, 2.5f, Color.RED, Color.BLUE, true);
 
-        // --- 3. DRAW LAYOUTS ---
+        // Layouts
         int dashboardX = (width / 2) - (centralDashboard.getTotalWidth() / 2);
         int dashboardY = (height / 2) - 50;
         centralDashboard.drawHorizontal(guiGraphics, dashboardX, dashboardY, mouseX, mouseY);
 
         sidebarNodes.drawVertical(guiGraphics, 20, 60, mouseX, mouseY);
 
-        // --- 4. DIRECTIONAL STRESS TEST (Grid) ---
+        // Directional progress bars
         int gridX = 20;
         int gridY = height - 80;
-        // Testing UP, DOWN, LEFT, RIGHT in a single cluster
+
         PrismRenderer.renderProgressBar(guiGraphics, gridX, gridY, 10, 40, smoothProgress, Color.YELLOW, PrismDirection.UP);
         PrismRenderer.renderProgressBar(guiGraphics, gridX + 15, gridY, 10, 40, smoothProgress, Color.ORANGE, PrismDirection.DOWN);
         PrismRenderer.renderProgressBar(guiGraphics, gridX + 30, gridY + 10, 40, 10, smoothProgress, Color.RED, PrismDirection.LEFT);
         PrismRenderer.renderProgressBar(guiGraphics, gridX + 30, gridY + 25, 40, 10, smoothProgress, Color.PINK, PrismDirection.RIGHT);
 
-        // --- 5. TEXTURED PROGRESS (UV CLIPPING) ---
+        // Textured progress bars
         int texX = width - 100;
         int texY = 60;
-        // Feature: Textured Progress with automatic UV calculation
+
         PrismRenderer.renderProgressBarTexture(guiGraphics, FURNACE_GUI, texX, texY, 24, 17, smoothProgress, 79, 34, PrismDirection.RIGHT);
         PrismRenderer.renderStringCenteredX(guiGraphics, font, Component.literal("UV_CLIP"), texX + 12, texY + 22, 0.6f, Color.GRAY, false);
 
-        // --- 6. SCISSOR MARQUEE (Clipped Area) ---
+        // Scissor usage
         int mWidth = 180;
         int mX = width - mWidth - 20;
         int mY = height - 40;
@@ -136,11 +132,9 @@ public class DemoScreen extends Screen {
         PrismRenderer.startScissor(guiGraphics, mX, mY, mWidth, 12);
 
         String text = "SCISSOR CLIPPING ENABLED • LERPING ACTIVE • RENDER ENGINE STABLE";
-
-        // Logic: Text slides from left to right based on smoothProgress
         int scroll = (int) (smoothProgress * (mWidth - font.width(text)));
 
-        // Now using the [Component -> Coordinates] signature
+        // Render scrolling label
         PrismRenderer.renderString(
                 guiGraphics,
                 font,
@@ -154,6 +148,7 @@ public class DemoScreen extends Screen {
 
         PrismRenderer.stopScissor(guiGraphics);
 
+        // Render watermark
         Utilities.renderWatermark(guiGraphics, width, height);
     }
 }

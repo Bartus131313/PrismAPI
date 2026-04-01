@@ -187,10 +187,6 @@ public class PrismVirtualSpace implements LevelAccessor, LightChunkGetter, Light
         blocks.put(pos.immutable(), updated);
     }
 
-    // ===================================================================================
-    // LEVEL WRITER & LEVEL ACCESSOR IMPLEMENTATIONS (1.21.1)
-    // ===================================================================================
-
     @Override
     public boolean setBlock(BlockPos pos, BlockState state, int flags, int recursionLeft) {
         putBlock(pos, state);
@@ -218,10 +214,6 @@ public class PrismVirtualSpace implements LevelAccessor, LightChunkGetter, Light
         return false; // Virtual spaces do not process ticking entities
     }
 
-    // ===================================================================================
-    // BLOCK AND TINT GETTER IMPLEMENTATIONS
-    // ===================================================================================
-
     @Override
     public BlockState getBlockState(BlockPos pos) {
         return blocks.getOrDefault(pos, Blocks.AIR.defaultBlockState());
@@ -236,8 +228,7 @@ public class PrismVirtualSpace implements LevelAccessor, LightChunkGetter, Light
     @Nullable
     @Override
     public BlockEntity getBlockEntity(BlockPos pos) {
-        // Returning null for Block Entities avoids heavy ticking calculations.
-        // If BE rendering is required, a dedicated virtual BE tick manager is needed.
+        // TODO: Add support for block entities.
         return null;
     }
 
@@ -261,10 +252,6 @@ public class PrismVirtualSpace implements LevelAccessor, LightChunkGetter, Light
         }
         return -1; // Default fallback tint
     }
-
-    // ===================================================================================
-    // LIGHTING SYSTEM IMPLEMENTATIONS
-    // ===================================================================================
 
     @Override
     public @Nullable LightChunk getChunkForLighting(int x, int z) {
@@ -299,24 +286,20 @@ public class PrismVirtualSpace implements LevelAccessor, LightChunkGetter, Light
         return null;
     }
 
-    // ===================================================================================
-    // SOUNDS, PARTICLES, AND EVENTS (1.21.1 Updated)
-    // ===================================================================================
+    // TODO: Add Sounds and Particles support.
 
     @Override
     public void playSound(@Nullable Player player, BlockPos pos, SoundEvent sound, SoundSource source, float volume, float pitch) {
-        // Plays the sound locally in the player's client environment (perfect for UI feedback)
-        if (Minecraft.getInstance().level != null) {
-            Minecraft.getInstance().level.playSound(player, pos, sound, source, volume, pitch);
-        }
+//        if (Minecraft.getInstance().level != null) {
+//            Minecraft.getInstance().level.playSound(player, pos, sound, source, volume, pitch);
+//        }
     }
 
     @Override
     public void addParticle(ParticleOptions particleData, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed) {
-        // Spawns particles directly into the client world if blocks in the UI trigger them
-        if (Minecraft.getInstance().level != null) {
-            Minecraft.getInstance().level.addParticle(particleData, x, y, z, xSpeed, ySpeed, zSpeed);
-        }
+//        if (Minecraft.getInstance().level != null) {
+//            Minecraft.getInstance().level.addParticle(particleData, x, y, z, xSpeed, ySpeed, zSpeed);
+//        }
     }
 
     @Override
@@ -328,12 +311,8 @@ public class PrismVirtualSpace implements LevelAccessor, LightChunkGetter, Light
 
     @Override
     public void gameEvent(Holder<GameEvent> event, Vec3 position, GameEvent.Context context) {
-        // Silently swallow GameEvents (Vibrations, Sculk Sensors) as they aren't needed in UI
-    }
 
-    // ===================================================================================
-    // LEVEL DATA & REGISTRY DELEGATION
-    // ===================================================================================
+    }
 
     @Override
     public RegistryAccess registryAccess() {
@@ -364,10 +343,6 @@ public class PrismVirtualSpace implements LevelAccessor, LightChunkGetter, Light
     public Holder<Biome> getUncachedNoiseBiome(int x, int y, int z) {
         return Minecraft.getInstance().level != null ? Minecraft.getInstance().level.getUncachedNoiseBiome(x, y, z) : null;
     }
-
-    // ===================================================================================
-    // TICKS, ENTITIES, AND STUBS
-    // ===================================================================================
 
     @Override
     public LevelTickAccess<Block> getBlockTicks() {

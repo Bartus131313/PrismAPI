@@ -147,14 +147,14 @@ public class PrismRenderer {
                                        int width, int height) {
         if (amount <= 0 || fluid == Fluids.EMPTY) return;
 
-        // Calculate the scaling (How high is the fluid?)
+        // Calculate the scaling
         float capacityRatio = (float) amount / maxAmount;
         int fluidHeight = (int) (height * capacityRatio);
 
-        // Adjust Y so it draws from the BOTTOM of the tank up
+        // Adjust Y so it draws from the bottom of the tank up
         int fluidY = y + (height - fluidHeight);
 
-        // Call your existing high-performance renderer
+        // Call existing fluid texture rendering method
         renderFluidTexture(guiGraphics, fluid, x, fluidY, width, fluidHeight);
     }
 
@@ -215,7 +215,7 @@ public class PrismRenderer {
         PrismRenderer.renderFluidTankWithTooltip(guiGraphics, fluid, amount, maxAmount, x, y, width, height, mouseX, mouseY, (info) -> {
             List<Component> lines = new ArrayList<>();
 
-            // Create the tooltip text (e.g., "Lava: 500 / 1000 mB")
+            // Create the default tooltip
             lines.add(Component.empty().append(info.getDisplayName())
                     .append(Component.literal(": " + PrismNumberFormatter.format(amount) + " / " + PrismNumberFormatter.format(maxAmount) + " mB"))
                     .withStyle(ChatFormatting.GRAY));
@@ -628,8 +628,6 @@ public class PrismRenderer {
      * @param height The height of the visible window.
      */
     public static void startScissor(GuiGraphics guiGraphics, int x, int y, int width, int height) {
-        // Minecraft's enableScissor uses absolute screen coordinates.
-        // It's best to use the built-in GuiGraphics helper which handles scaling.
         guiGraphics.enableScissor(x, y, x + width, y + height);
     }
 
@@ -660,7 +658,7 @@ public class PrismRenderer {
         guiGraphics.pose().scale(scale, scale, 1.0f);
 
         float totalWidth = font.width(text);
-        final float[] currentX = {0}; // Array used to allow modification inside lambda
+        final float[] currentX = {0};
 
         // Start/End color extraction
         int r0 = (colorStart >> 16) & 0xFF, g0 = (colorStart >> 8) & 0xFF, b0 = colorStart & 0xFF, a0 = (colorStart >> 24) & 0xFF;
@@ -676,7 +674,7 @@ public class PrismRenderer {
             int gb = (int) PrismAnimation.lerp(b0, b1, delta);
             int ga = (int) PrismAnimation.lerp(a0, a1, delta);
 
-            // Component Tint (White = 1.0)
+            // Component Tint
             int cCol = style.getColor() != null ? style.getColor().getValue() : 0xFFFFFF;
 
             // Multiply channels
@@ -798,13 +796,11 @@ public class PrismRenderer {
         PoseStack poseStack = guiGraphics.pose();
         poseStack.pushPose();
 
-        // Move exactly to X and Y.
-        // Because of how the scaling works next, this X and Y is now the absolute CENTER of the block.
+        // Move to correct position
+        // TODO: Make Z-Level detection automatically.
         poseStack.translate(x, y, 150.0F);
 
         // Scale and Flip.
-        // - Vanilla base size is 16. We multiply by your custom scale.
-        // - We make the Y-scale NEGATIVE to flip the 3D block right-side up for the GUI.
         float finalScale = 16.0F * scale;
         poseStack.scale(finalScale, -finalScale, finalScale);
 
@@ -814,7 +810,6 @@ public class PrismRenderer {
         BakedModel model = itemRenderer.getModel(stack, null, null, 0);
 
         // Dynamic Lighting
-        // Solid blocks need 3D lighting, but flat blocks (like Saplings/Flowers) need flat lighting.
         boolean usesBlockLight = model.usesBlockLight();
         if (usesBlockLight) {
             Lighting.setupFor3DItems();
@@ -826,7 +821,7 @@ public class PrismRenderer {
 
         // Render the Model
         itemRenderer.render(stack, ItemDisplayContext.GUI, false, poseStack, bufferSource,
-                15728880, // Full Brightness
+                15728880,
                 OverlayTexture.NO_OVERLAY,
                 model
         );
@@ -860,7 +855,6 @@ public class PrismRenderer {
         poseStack.pushPose();
 
         // Translate by standard Minecraft block coordinates (1.0 = 1 block)
-        // We center the block by shifting it by -0.5, allowing structures to rotate nicely around their center
         poseStack.translate(gridX - 0.5f, gridY - 0.5f, gridZ - 0.5f);
 
         // Ensure the correct shader is set for 3D blocks
@@ -870,13 +864,12 @@ public class PrismRenderer {
         MultiBufferSource.BufferSource bufferSource = guiGraphics.bufferSource();
 
         // Get the correct buffer for the block's render type (Solid, Cutout, etc.)
-        // If we use a generic buffer, complex blocks like Pistons/Glass often turn invisible.
         RenderType type = ItemBlockRenderTypes.getChunkRenderType(state);
         VertexConsumer consumer = guiGraphics.bufferSource().getBuffer(type);
 
         // Render the BlockState directly
         dispatcher.renderSingleBlock(state, poseStack, bufferSource,
-                15728880, // Full Brightness
+                15728880,
                 OverlayTexture.NO_OVERLAY);
 
         poseStack.popPose();
@@ -890,20 +883,34 @@ public class PrismRenderer {
         renderBlock3D(guiGraphics, block.defaultBlockState(), gridX, gridY, gridZ);
     }
 
+    /**
+     * Renders {@link PrismVirtualSpace} on GUI. Used for complicated scenes to reduce draw calls on each block and also
+     * make block connections working.
+     * @param guiGraphics   The current GuiGraphics instance.
+     * @param space         Virtual Space which will be rendered.
+     */
     public static void renderSpace(GuiGraphics guiGraphics, PrismVirtualSpace space) {
         BlockRenderDispatcher dispatcher = Minecraft.getInstance().getBlockRenderer();
         RandomSource random = RandomSource.create();
 
+        // Get current PoseStack
         PoseStack poseStack = guiGraphics.pose();
 
+        // Setup lighting for 3D items
         Lighting.setupFor3DItems();
 
+        // Iterate through all Block positions in Space
         for (BlockPos pos : space.getAllPositions()) {
+            // Get Block state
             BlockState state = space.getBlockState(pos);
 
+            // Push PoseStack
             poseStack.pushPose();
+
+            // Move object by 0.5f to be centered
             poseStack.translate(pos.getX() - 0.5f, pos.getY() - 0.5f, pos.getZ() - 0.5f);
 
+            // Get correct RenderType for current Block (Solid, Cutout, etc.)
             RenderType type = ItemBlockRenderTypes.getChunkRenderType(state);
             VertexConsumer consumer = guiGraphics.bufferSource().getBuffer(type);
 
@@ -918,9 +925,11 @@ public class PrismRenderer {
                     random
             );
 
+            // Pop PoseStack
             poseStack.popPose();
         }
 
+        // Return to Lighting for flat items
         Lighting.setupForFlatItems();
     }
 
@@ -930,9 +939,7 @@ public class PrismRenderer {
      * @param direction The direction the piston is facing (e.g., Direction.UP)
      */
     public static void renderPiston3D(GuiGraphics guiGraphics, Direction direction, float progress, float gridX, float gridY, float gridZ) {
-        // Determine if we should hide the head on the base
-        // If progress is 0, we show the normal retracted piston (wood included).
-        // If progress > 0, we must set EXTENDED to true to hide the base's wooden part.
+        // Determine if the head should be hidden
         boolean isExtended = progress > 0.0f;
 
         // Prepare the Base State
@@ -940,14 +947,13 @@ public class PrismRenderer {
                 .setValue(PistonBaseBlock.FACING, direction)
                 .setValue(PistonBaseBlock.EXTENDED, isExtended);
 
-        // Render the Base (Now just the stone part if progress > 0)
+        // Render the Base
         renderBlock3D(guiGraphics, baseState, gridX, gridY, gridZ);
 
         // Render the Moving Head
         if (isExtended) {
             BlockState headState = Blocks.PISTON_HEAD.defaultBlockState()
                     .setValue(PistonHeadBlock.FACING, direction)
-                    // Short = true makes the 'arm' of the piston head shorter (used for the base connection)
                     .setValue(PistonHeadBlock.SHORT, false);
 
             // Calculate movement offset
@@ -967,11 +973,10 @@ public class PrismRenderer {
         PoseStack poseStack = guiGraphics.pose();
         poseStack.pushPose();
 
-        // Move to the grid position and center the "anchor point"
+        // Move to the grid position and center it
         poseStack.translate(gridX - 0.5f, gridY - 0.5f, gridZ - 0.5f);
 
-        // Execute the developer's custom code
-        // We provide the poseStack so they can do their own rotations/scaling inside their block space
+        // Render custom 3D object
         renderer.render(guiGraphics, poseStack, guiGraphics.bufferSource(), Minecraft.getInstance().getTimer().getGameTimeDeltaPartialTick(true));
 
         poseStack.popPose();
@@ -1005,27 +1010,23 @@ public class PrismRenderer {
         PoseStack poseStack = guiGraphics.pose();
         poseStack.pushPose();
 
-        // 1. Position with a tiny Z-offset to prevent Z-fighting
+        // Move the model by 0.5f to center it and also scale it a little bit to prevent Z-fighting
         poseStack.translate(gridX - 0.5f, gridY - 0.5f, gridZ - 0.495f);
         poseStack.scale(1.001f, 1.001f, 1.001f); // Tiny scale up to wrap the block
 
-        // 2. THE SECRET SAUCE: SheetedDecalTextureGenerator
-        // This takes the standard block model and "re-paints" the breaking texture over it.
         MultiBufferSource.BufferSource bufferSource = guiGraphics.bufferSource();
 
         // Get the texture atlas for the crumbling blocks
         var crumblingTex = ModelBakery.DESTROY_TYPES.get(stage);
 
-        // We create a special consumer that redirects the block's vertices
-        // to use the crumbling texture instead of its normal texture.
+        // Use model of the Block to get good result
         VertexConsumer crackingConsumer = new SheetedDecalTextureGenerator(
                 bufferSource.getBuffer(crumblingTex),
                 poseStack.last(),
-                1.0f // Scale of the decal
+                1.0f
         );
 
-        // 3. Render the block model using our Cracking Consumer
-        // We use the ModelRenderer directly here for maximum control
+        // Render the Block model with Breaking texture
         mc.getBlockRenderer().getModelRenderer().tesselateBlock(
                 mc.level,
                 mc.getBlockRenderer().getBlockModel(state),
@@ -1033,15 +1034,13 @@ public class PrismRenderer {
                 BlockPos.ZERO,
                 poseStack,
                 crackingConsumer,
-                false, // Don't use checkSides (we want to see all cracks)
+                false,
                 mc.level.random,
                 state.getSeed(BlockPos.ZERO),
                 OverlayTexture.NO_OVERLAY
         );
 
-        // 4. Force the draw call immediately
         guiGraphics.flush();
-
         poseStack.popPose();
     }
 }

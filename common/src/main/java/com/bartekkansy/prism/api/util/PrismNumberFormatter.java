@@ -5,17 +5,17 @@ import java.text.DecimalFormat;
 /**
  * Utility for formatting large numbers into human-readable strings.
  * <p>
- * Converts raw values into "Short Scale" notation (e.g., 1,500 becomes 1.5k).
+ * Converts raw values into "Short Scale" notation (e.g., 1,500 becomes 1.5K).
  * </p>
  */
 public class PrismNumberFormatter {
 
-    private static final String[] SUFFIXES = {"", "k", "M", "G", "T", "P", "E"};
+    private static final String[] SUFFIXES = {"", "K", "M", "G", "T", "P", "E"};
     private static final DecimalFormat FORMAT = new DecimalFormat("#.#");
 
     /**
      * Formats a long value with a metric suffix.
-     * * @param value The raw number to format.
+     * @param value The raw number to format.
      * @return A formatted string (e.g., "1.2M").
      */
     public static String format(long value) {
